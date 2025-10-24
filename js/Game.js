@@ -1,6 +1,7 @@
 // js/Game.js
 import { Dialogue } from './Dialogue.js';
 import { CharacterSelect } from './CharacterSelect.js';
+import { MenuBackground } from './MenuBackground.js';
 
 class Game {
     constructor() {
@@ -19,15 +20,14 @@ class Game {
         // --- Player (Synthya) ---
         this.player = { x: 0, y: 0, targetX: 0, targetY: 0, speed: 3, img: null, w: 0, h: 0 };
 
-        // --- Modules ---
+    // --- Modules ---
         this.dialogue = new Dialogue(this);
         this.characterSelect = new CharacterSelect(this);
+    this.menuBackground = new MenuBackground(this.views['menu']);
 
         // --- World Canvas ---
         this.canvas = document.getElementById('world-canvas');
         this.ctx = this.canvas.getContext('2d');
-        this.resizeCanvas();
-        window.addEventListener('resize', () => this.resizeCanvas());
 
         // --- World & Assets ---
         this.world = {
@@ -43,6 +43,10 @@ class Game {
         };
         this.loadWorldAssets();
 
+        // Now that world is defined, handle canvas sizing
+        this.resizeCanvas();
+        window.addEventListener('resize', () => this.resizeCanvas());
+
         // --- Input ---
         this.canvas.addEventListener('click', (e) => this.handleWorldClick(e));
 
@@ -54,19 +58,90 @@ class Game {
         const overlay = document.getElementById('overlay');
         const overlayBody = document.getElementById('overlay-body');
         const overlayClose = document.getElementById('overlay-close');
+        const menuView = this.views['menu'];
 
-        if (backToMenu) backToMenu.addEventListener('click', () => this.changeState('menu'));
-        if (storyBtn) storyBtn.addEventListener('click', async () => {
-            if (bgMusic) { try { bgMusic.muted = false; await bgMusic.play(); } catch {} }
-            this.changeState('character-select');
-        });
+        // Background music playlist (menu.mp3 -> menu2.mp3 -> repeat)
+        this.bgMusicEl = bgMusic;
+        this.bgPlaylist = ['assets/audio/menu.mp3', 'assets/audio/menu2.mp3'];
+        this.bgIndex = 0;
+        this.bgMusicHandlerBound = null;
+        this.startMenuMusic = async () => {
+            const el = this.bgMusicEl; if (!el) return;
+            if (!this.bgMusicHandlerBound) {
+                this.bgMusicHandlerBound = async () => {
+                    this.bgIndex = (this.bgIndex + 1) % this.bgPlaylist.length;
+                    el.src = this.bgPlaylist[this.bgIndex];
+                    el.currentTime = 0;
+                    try { await el.play(); } catch (e) { /* gesture needed */ }
+                };
+                el.addEventListener('ended', this.bgMusicHandlerBound);
+            }
+            const want = this.bgPlaylist[this.bgIndex];
+            if (!el.src || !el.src.includes(want)) {
+                el.src = want;
+                el.currentTime = 0;
+            }
+            el.muted = false;
+            try { await el.play(); } catch (err) { console.debug('Music play attempt:', err?.message || err); }
+        };
+        this.stopMenuMusic = () => {
+            const el = this.bgMusicEl; if (!el) return;
+            try { el.pause(); } catch {}
+            el.currentTime = 0;
+            if (this.bgMusicHandlerBound) {
+                el.removeEventListener('ended', this.bgMusicHandlerBound);
+                this.bgMusicHandlerBound = null;
+            }
+            this.bgIndex = 0;
+        };
+
+        if (backToMenu) backToMenu.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); this.changeState('menu'); });
+        if (storyBtn) {
+            console.log('Binding Story button');
+            storyBtn.addEventListener('click', async (e) => {
+                e.preventDefault(); e.stopPropagation();
+                console.log('Story clicked');
+                await this.startMenuMusic();
+                this.changeState('character-select');
+            });
+        }
         if (aboutBtn && overlay && overlayBody && overlayClose) {
-            aboutBtn.addEventListener('click', () => {
+            console.log('Binding About button');
+            aboutBtn.addEventListener('click', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                // Start music on About as well
+                this.startMenuMusic();
                 overlayBody.innerHTML = '<h2>About</h2><p>Neocity Mobile is a cybertech-inspired narrative adventure. Choose characters, traverse the Grid, and uncover the multiverse.</p>';
                 overlay.classList.remove('hidden');
             });
-            overlayClose.addEventListener('click', () => overlay.classList.add('hidden'));
+            overlayClose.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); overlay.classList.add('hidden'); });
             overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.add('hidden'); });
+        }
+        // Fallback: delegate clicks from the menu view in case direct handlers miss
+        if (menuView) {
+            menuView.addEventListener('click', async (e) => {
+                const storyEl = e.target.closest && e.target.closest('#story-btn');
+                const aboutEl = e.target.closest && e.target.closest('#about-btn');
+                if (storyEl) {
+                    e.preventDefault(); e.stopPropagation();
+                    console.log('Story clicked (delegated)');
+                    await this.startMenuMusic();
+                    this.changeState('character-select');
+                } else if (aboutEl && overlay && overlayBody) {
+                    e.preventDefault(); e.stopPropagation();
+                    this.startMenuMusic();
+                    overlayBody.innerHTML = '<h2>About</h2><p>Neocity Mobile is a cybertech-inspired narrative adventure. Choose characters, traverse the Grid, and uncover the multiverse.</p>';
+                    overlay.classList.remove('hidden');
+                }
+            }, true);
+            // Also attempt to start music on any first interaction anywhere in menu
+            const gestureHandler = async () => {
+                await this.startMenuMusic();
+                menuView.removeEventListener('pointerdown', gestureHandler, true);
+                menuView.removeEventListener('keydown', gestureHandler, true);
+            };
+            menuView.addEventListener('pointerdown', gestureHandler, true);
+            menuView.addEventListener('keydown', gestureHandler, true);
         }
 
         // --- Loop ---
@@ -76,9 +151,10 @@ class Game {
 
     // --- Layout ---
     resizeCanvas() {
+        if (!this.canvas) return;
         this.canvas.width = this.canvas.clientWidth;
         this.canvas.height = this.canvas.clientHeight;
-        this.layoutScene();
+        if (this.world) this.layoutScene();
     }
 
     changeState(newState) {
@@ -87,6 +163,15 @@ class Game {
             this.views[newState].classList.remove('hidden');
             this.gameState = newState;
             if (newState === 'world') this.resizeCanvas();
+            // Start/stop menu dynamic background appropriately
+            if (newState === 'menu') {
+                this.menuBackground && this.menuBackground.start();
+                // Try to start music (will only work after a gesture)
+                (async ()=>{ try { await this.startMenuMusic(); } catch {} })();
+            } else {
+                this.menuBackground && this.menuBackground.stop();
+                this.stopMenuMusic();
+            }
         }
     }
 
