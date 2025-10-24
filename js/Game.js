@@ -208,27 +208,27 @@ class Game {
     // --- Assets ---
     loadWorldAssets() {
         const bg = new Image();
-        bg.src = '../assets/images/scenes/background.png';
+        bg.src = 'assets/images/scenes/background.png';
         bg.onload = () => { this.world.backgroundImg = bg; };
 
         const bar = new Image();
-        bar.src = '../assets/images/scenes/the-broken-mug.png';
+        bar.src = 'assets/images/scenes/the-broken-mug.png';
         bar.onload = () => { this.world.barImg = bar; this.layoutScene(); };
 
         const juke = new Image();
-        juke.src = '../assets/images/scenes/jukebox.png';
+        juke.src = 'assets/images/scenes/jukebox.png';
         juke.onload = () => { this.world.jukeboxImg = juke; this.layoutScene(); };
 
         const sign = new Image();
-        sign.src = '../assets/images/scenes/neon-sign.svg';
+        sign.src = 'assets/images/scenes/neon-sign.svg';
         sign.onload = () => { this.world.signImg = sign; this.layoutScene(); };
 
         const kael = new Image();
-        kael.src = '../assets/images/characters/kael/kael-normal.png';
+        kael.src = 'assets/images/characters/kael/kael-normal.png';
         kael.onload = () => { this.world.kaelImg = kael; this.layoutScene(); };
 
         const syn = new Image();
-        syn.src = '../assets/images/characters/synthya/synthya.png';
+        syn.src = 'assets/images/characters/synthya/synthya.png';
         syn.onload = () => { this.player.img = syn; this.layoutScene(); };
     }
 

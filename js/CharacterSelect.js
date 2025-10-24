@@ -11,35 +11,35 @@ export class CharacterSelect {
             {
                 id: 'synthya',
                 name: 'Synthya',
-                img: '../assets/images/characters/synthya/synthya.png',
+                img: 'assets/images/characters/synthya/synthya.png',
                 locked: false,
                 blurb: 'Synthya is a sentient synth with fragmented memories and a mysterious tie to the Grid. She navigates glitches with empathy and razor logic.'
             },
             {
                 id: 'echo',
                 name: 'Echo',
-                img: '../assets/images/characters/echo/echo.png',
+                img: 'assets/images/characters/echo/echo.png',
                 locked: true,
                 blurb: 'Echo is a data-runner who speaks in reflections—rumored to have duplicated consciousness split across shards of the City.'
             },
             {
                 id: 'kael',
                 name: 'Kael',
-                img: '../assets/images/characters/kael/kael.png',
+                img: 'assets/images/characters/kael/kael.png',
                 locked: true,
                 blurb: 'Kael was once a guardian of the Neon Archives. Exiled after a breach, he now hunts the truth that broke his oath.'
             },
             {
                 id: 'rune',
                 name: 'Rune',
-                img: '../assets/images/characters/rune/rune.png',
+                img: 'assets/images/characters/rune/rune.png',
                 locked: true,
                 blurb: 'Rune reads the Grid like a living language, weaving code-charms that bend probability and fate.'
             },
             {
                 id: 'vesper',
                 name: 'Vesper',
-                img: '../assets/images/characters/vesper/vesper.png',
+                img: 'assets/images/characters/vesper/vesper.png',
                 locked: true,
                 blurb: 'Vesper moves in silence, a courier for secrets—trading in debts and invisible alliances.'
             }

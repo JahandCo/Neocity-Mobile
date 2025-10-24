@@ -174,7 +174,7 @@ export class Dialogue {
         if (!key) return null;
         // Map logical keys to asset paths
         const map = {
-            'broken_mug': '../assets/images/scenes/the-broken-mug.png'
+            'broken_mug': 'assets/images/scenes/the-broken-mug.png'
         };
         return map[key] || null;
     }

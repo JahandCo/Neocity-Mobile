@@ -5,24 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Neocity Mobile</title>
     <!-- Core styles -->
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css">
     <!-- Menu-specific styles -->
-    <link rel="stylesheet" href="../assets/css/menu.css">
+    <link rel="stylesheet" href="assets/css/menu.css">
     <!-- Character select styles -->
-    <link rel="stylesheet" href="../assets/css/character-select.css">
+    <link rel="stylesheet" href="assets/css/character-select.css">
 </head>
 <body>
     
     <canvas id="particle-canvas"></canvas>
 
     <!-- Menu music: starts muted to satisfy autoplay policies, unmuted on user interaction -->
-    <audio id="bg-music" src="../assets/audio/menu.mp3" autoplay loop muted></audio>
+    <audio id="bg-music" src="assets/audio/menu.mp3" autoplay loop muted></audio>
 
 
     <div id="game-screen">
 
         <div id="menu-view" class="game-view">
-            <img class="logo" src="../assets/images/neocitylogo-1.png" alt="Neocity Logo">
+            <img class="logo" src="assets/images/neocitylogo-1.png" alt="Neocity Logo">
             <div class="menu-buttons-row">
                 <button id="story-btn" class="menu-pill shimmer">Story</button>
                 <button id="about-btn" class="menu-pill shimmer">About</button>
@@ -57,7 +57,7 @@
 
             <div id="character-select-view" class="game-view hidden">
                 <button id="back-to-menu-btn" class="back-button">⟵ Back to Menu</button>
-                <img class="corner-tech-logo" src="../assets/images/techlogo-1.png" alt="Tech Logo">
+                <img class="corner-tech-logo" src="assets/images/techlogo-1.png" alt="Tech Logo">
                 <div class="character-selection-container">
                     <div class="character-grid" id="character-grid"></div>
                     <!-- Details overlay injected dynamically -->
@@ -66,7 +66,7 @@
 
     </div>
 
-    <script src="../js/main.js" type="module"></script>
+    <script src="js/main.js" type="module"></script>
 
 </body>
 </html>
