@@ -275,3 +275,34 @@ html, body {
 .pipe-cell[style*="--e: 1"] { --e-size: 44px; background-size: 16px 44px, 44px 16px, auto; }
 .pipe-cell[style*="--s: 1"] { background-size: 16px 44px, var(--e-size,0) 16px, auto; }
 .pipe-cell[style*="--w: 1"] { background-size: 16px 44px, 44px 16px, auto; }
+
+/* Audio Stitch (wave reorder) */
+.wave-grid { display:flex; gap:10px; justify-content:center; margin: 16px auto; }
+.wave-segment {
+    width: 70px; height: 100px; border-radius: 10px; border: 2px solid rgba(0,255,255,0.35);
+    background: conic-gradient(from calc(var(--phase,0) * 45deg), rgba(0,255,255,0.2), rgba(148,0,211,0.25), rgba(0,255,255,0.2));
+    box-shadow: inset 0 0 18px rgba(0,255,255,0.12);
+    cursor: pointer; position: relative; overflow:hidden;
+}
+.wave-segment::after {
+    content:''; position:absolute; inset:0; background:
+        repeating-linear-gradient(to top, rgba(255,255,255,0.12) 0 2px, transparent 2px 6px);
+    mix-blend-mode: screen; opacity: 0.4;
+}
+.wave-segment.selected { outline: 2px solid #00ffff; box-shadow: 0 0 14px #00ffff; }
+.wave-controls { text-align:center; min-height: 24px; }
+
+/* Input prompt */
+.input-prompt { display:flex; gap: 10px; align-items:center; flex-wrap:wrap; }
+.input-prompt label { color:#e6faff; font-size: 16px; }
+.input-prompt .text-entry { padding:10px 12px; border:1px solid #00ffff; background:rgba(0,0,0,0.4); color:#e6faff; }
+.input-error { color:#ff6b6b; margin-left: 8px; }
+.shake { animation: shakeAnim 0.4s ease; }
+@keyframes shakeAnim { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)} 40%{transform:translateX(5px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)} }
+
+/* Stealth minigame */
+.stealth-area { position: relative; width: 480px; max-width: 92vw; margin: 0 auto; padding: 16px; text-align:center; }
+.stealth-area .seeker { position: relative; width: 100%; height: 140px; margin-bottom: 12px; background: rgba(0,0,0,0.35); border: 1px solid rgba(0,255,255,0.2); overflow:hidden; }
+.stealth-area .seeker::before { content:''; position:absolute; top:0; bottom:0; width: 40%; left: calc(var(--phase, 0) * 100% - 20%); background: linear-gradient(90deg, transparent, rgba(255,0,0,0.18), transparent); filter: blur(4px); }
+.stealth-area .cover { width: 100%; height: 10px; background: linear-gradient(90deg, rgba(0,255,255,0.4) 20%, rgba(148,0,211,0.4) 80%); margin-bottom: 12px; }
+.stealth-area #stealth-status { min-height: 20px; margin-top: 8px; color: #e6faff; }

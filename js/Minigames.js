@@ -18,6 +18,10 @@ export class Minigames {
             this.buildSimon(content, def, () => { cleanup(); onComplete && onComplete(); });
         } else if (def.type === 'memory_puzzle') {
             this.buildPipes(content, def, () => { cleanup(); onComplete && onComplete(); });
+        } else if (def.type === 'audio_stitch') {
+            this.buildAudioStitch(content, def, () => { cleanup(); onComplete && onComplete(); });
+        } else if (def.type === 'stealth_escape') {
+            this.buildStealth(content, def, () => { cleanup(); onComplete && onComplete(); });
         } else {
             // Fallback generic
             content.innerHTML = `
@@ -223,5 +227,84 @@ export class Minigames {
         });
 
         render();
+    }
+
+    // --- Audio Stitch (wave reorder) ---
+    static buildAudioStitch(container, def, done) {
+        const SEGMENTS = 5;
+        const order = Array.from({length: SEGMENTS}, (_,i)=>i);
+        // Shuffle
+        for (let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; }
+        let first = null;
+        container.innerHTML = `
+            <h2 style="margin-top:0;">${def.title || 'Stitch the Audio'}</h2>
+            ${def.description ? `<p>${def.description}</p>` : '<p>Reorder the wave segments into a smooth line.</p>'}
+            <div class="minigame-container">
+                <div class="wave-grid"></div>
+                <div class="wave-controls"><span id="wave-status"></span></div>
+            </div>
+        `;
+        const grid = container.querySelector('.wave-grid');
+        const status = container.querySelector('#wave-status');
+        const render = () => {
+            grid.innerHTML='';
+            order.forEach((idx,pos)=>{
+                const seg = document.createElement('button');
+                seg.className = 'wave-segment';
+                seg.dataset.pos = String(pos);
+                seg.textContent = '';
+                seg.style.setProperty('--phase', String(idx));
+                seg.addEventListener('click', ()=>{
+                    if (first===null) { first = pos; seg.classList.add('selected'); return; }
+                    if (first===pos) { seg.classList.remove('selected'); first=null; return; }
+                    const other = grid.querySelector(`.wave-segment[data-pos="${first}"]`);
+                    if (other) other.classList.remove('selected');
+                    [order[first], order[pos]] = [order[pos], order[first]];
+                    first=null; render();
+                    if (order.every((v,i)=>v===i)) { status.textContent='Audio Restored!'; setTimeout(done, 500); }
+                });
+                grid.appendChild(seg);
+            });
+        };
+        render();
+    }
+
+    // --- Stealth Escape (simple timing) ---
+    static buildStealth(container, def, done) {
+        const stepsRequired = 3;
+        let steps = 0;
+        let safe = false;
+        let timer=null;
+        container.innerHTML = `
+            <h2 style="margin-top:0;">${def.title || 'Evade the Seeker'}</h2>
+            ${def.description ? `<p>${def.description}</p>` : '<p>Move only when the scanner is away.</p>'}
+            <div class="minigame-container stealth-area">
+                <div class="seeker"></div>
+                <div class="cover"></div>
+                <button id="stealth-move" class="primary-btn">Move</button>
+                <div id="stealth-status"></div>
+            </div>
+        `;
+        const seeker = container.querySelector('.seeker');
+        const moveBtn = container.querySelector('#stealth-move');
+        const status = container.querySelector('#stealth-status');
+        const loop = () => {
+            const period = 2000; // 2s sweep
+            const t = Date.now() % period;
+            // safe when t in middle 600-1400ms
+            safe = (t>600 && t<1400);
+            seeker.style.setProperty('--phase', String(t/period));
+            timer = requestAnimationFrame(loop);
+        };
+        loop();
+        moveBtn.addEventListener('click', ()=>{
+            if (safe) {
+                steps++;
+                status.textContent = `Moved (${steps}/${stepsRequired})`;
+                if (steps>=stepsRequired) { cancelAnimationFrame(timer); setTimeout(done, 300); }
+            } else {
+                status.textContent = 'Detected! Wait for the scan to pass.';
+            }
+        });
     }
 }

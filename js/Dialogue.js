@@ -17,6 +17,13 @@ export class Dialogue {
         this.currentNodes = [];
         this.nodeIndex = 0;
 
+        // Lightweight audio manager for scenes
+        this.musicEl = new Audio();
+        this.musicEl.loop = true;
+        this.musicEl.volume = 0.5;
+        this.sfxEl = new Audio();
+        this.sfxEl.volume = 0.7;
+
         // Click handling
         this.view.addEventListener('click', (e) => this.onClick(e));
     }
@@ -33,6 +40,13 @@ export class Dialogue {
             console.error('Scene not found:', sceneId);
             return this.game.endDialogue();
         }
+        // Update game flags on entering solved states
+        if (sceneId === 'jukebox_solved') {
+            if (this.game && this.game.flags) this.game.flags.jukeboxFixed = true;
+        }
+        if (sceneId === 'sign_solved') {
+            if (this.game && this.game.flags) this.game.flags.signFixed = true;
+        }
         this.currentSceneId = sceneId;
         this.currentNodes = scene.dialogue || [];
         this.nodeIndex = 0;
@@ -43,6 +57,16 @@ export class Dialogue {
         } else {
             this.view.style.background = 'rgba(0,0,0,0.4)';
         }
+        // Start scene music if provided
+        if (scene.music) {
+            this.playMusic(scene.music);
+        } else {
+            this.stopMusic();
+        }
+        // Apply any entry effects immediately
+        if (scene.effectsOnStart && Array.isArray(scene.effectsOnStart)) {
+            this.applyEffects(scene.effectsOnStart);
+        }
         // If scene is a minigame scene definition, run it instead
         if (scene.minigame) {
             Minigames.run(scene.minigame, () => {
@@ -52,6 +76,11 @@ export class Dialogue {
                     this.game.endDialogue();
                 }
             });
+            return;
+        }
+        // If scene requires input (logic puzzle), render input form
+        if (scene.inputPrompt) {
+            this.renderInputScene(scene);
             return;
         }
         this.renderNode();
@@ -101,6 +130,10 @@ export class Dialogue {
                         this.game.endDialogue();
                     }
                 });
+                // Optional hover SFX
+                if (choice.hoverSfx) {
+                    btn.addEventListener('mouseenter', () => this.playSfx(choice.hoverSfx));
+                }
                 this.choicesEl.appendChild(btn);
             });
         }
@@ -174,8 +207,73 @@ export class Dialogue {
         if (!key) return null;
         // Map logical keys to asset paths
         const map = {
-            'broken_mug': 'assets/images/scenes/the-broken-mug.png'
+            'broken_mug': 'assets/images/scenes/the-broken-mug.png',
+            'archive': 'assets/images/scenes/background.png'
         };
         return map[key] || null;
+    }
+
+    // --- Input scene (logic puzzle) ---
+    renderInputScene(scene) {
+        // Show last node text if present, otherwise use prompt
+        const node = (scene.dialogue && scene.dialogue[0]) || null;
+        this.textEl.textContent = node?.text || '';
+        this.nameEl.textContent = node?.speaker || '';
+        this.portraitEl.innerHTML = '';
+        this.choicesEl.innerHTML = '';
+        // Build prompt UI
+        const wrapper = document.createElement('div');
+        wrapper.className = 'input-prompt';
+        const label = document.createElement('label');
+        label.textContent = scene.inputPrompt;
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = 'Type your answer';
+        input.className = 'text-entry';
+        const submit = document.createElement('button');
+        submit.textContent = 'Confirm';
+        submit.className = 'choice-btn';
+        const error = document.createElement('div');
+        error.className = 'input-error';
+        error.style.display = 'none';
+        error.textContent = 'Incorrect. Try again.';
+        wrapper.appendChild(label);
+        wrapper.appendChild(input);
+        wrapper.appendChild(submit);
+        wrapper.appendChild(error);
+        this.choicesEl.appendChild(wrapper);
+        const normalize = s => (s || '').trim().toLowerCase();
+        submit.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (normalize(input.value) === normalize(scene.inputAnswer)) {
+                this.loadScene(scene.nextOnCorrect);
+            } else {
+                error.style.display = 'block';
+                wrapper.classList.add('shake');
+                setTimeout(()=>wrapper.classList.remove('shake'), 400);
+            }
+        });
+    }
+
+    // --- Audio helpers ---
+    async playMusic(src) {
+        try {
+            this.musicEl.src = src;
+            await this.musicEl.play();
+        } catch (e) {
+            // Ignore if autoplay blocked
+        }
+    }
+    stopMusic() {
+        try { this.musicEl.pause(); } catch {}
+        this.musicEl.currentTime = 0;
+        this.musicEl.removeAttribute('src');
+    }
+    async playSfx(src) {
+        try {
+            this.sfxEl.src = src;
+            this.sfxEl.currentTime = 0;
+            await this.sfxEl.play();
+        } catch (e) {}
     }
 }

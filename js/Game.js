@@ -20,6 +20,12 @@ class Game {
         // --- Player (Synthya) ---
         this.player = { x: 0, y: 0, targetX: 0, targetY: 0, speed: 3, img: null, w: 0, h: 0 };
 
+        // --- Progress Flags (puzzle state) ---
+        this.flags = {
+            jukeboxFixed: false,
+            signFixed: false
+        };
+
     // --- Modules ---
         this.dialogue = new Dialogue(this);
         this.characterSelect = new CharacterSelect(this);
@@ -241,8 +247,31 @@ class Game {
         const clickY = event.clientY - rect.top;
         this.player.targetX = clickX;
         this.player.targetY = this.world.barY + this.world.barH - this.player.h;
+        // Hotspots: Jukebox, Neon Sign, Kael
+        if (this.pointInJukebox(clickX, clickY)) {
+            if (this.flags.jukeboxFixed) {
+                this.dialogue.startStory('jukebox_solved');
+            } else {
+                this.dialogue.startStory('puzzle_jukebox');
+            }
+            return;
+        }
+        if (this.pointInSign(clickX, clickY)) {
+            if (this.flags.signFixed) {
+                this.dialogue.startStory('sign_solved');
+            } else {
+                this.dialogue.startStory('puzzle_sign');
+            }
+            return;
+        }
         if (this.pointInKael(clickX, clickY)) {
-            this.dialogue.startStory('broken_mug_loop_start');
+            // Gate Kael confrontation until anomalies are fixed
+            if (this.flags.jukeboxFixed && this.flags.signFixed) {
+                this.dialogue.startStory('puzzle_kael_final');
+            } else {
+                this.dialogue.startStory('puzzle_kael_talk');
+            }
+            return;
         }
     }
 
@@ -322,6 +351,16 @@ class Game {
         return x >= kaelX && x <= kaelX + kaelW && y >= kaelY && y <= kaelY + kaelH;
     }
 
+    pointInJukebox(x, y) {
+        const { jukeX, jukeY, jukeW, jukeH } = this.world;
+        return x >= jukeX && x <= jukeX + jukeW && y >= jukeY && y <= jukeY + jukeH;
+    }
+
+    pointInSign(x, y) {
+        const { signX, signY, signW, signH } = this.world;
+        return x >= signX && x <= signX + signW && y >= signY && y <= signY + signH;
+    }
+
     // --- Loop ---
     gameLoop() {
         if (this.gameState === 'world') {
@@ -329,6 +368,12 @@ class Game {
             this.drawWorld();
         }
         requestAnimationFrame(() => this.gameLoop());
+    }
+
+    // --- Dialogue End Hook ---
+    endDialogue() {
+        // Return to world exploration
+        this.changeState('world');
     }
 }
 

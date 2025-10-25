@@ -6,10 +6,19 @@ export const synthyaStory = {
     
     // Story scenes with dialogue, choices, and events
     scenes: {
+        kael_project_archive: {
+            background: "archive",
+            music: "assets/audio/menu.mp3",
+            dialogue: [
+                { speaker: "System", text: "Optional memory: KAEL - PROJECT ARCHIVE", effects: ["scan"] },
+                { speaker: "Kael", emotion: "happy", text: "I can't believe 'Project Sundown' actually worked! To the next one, 'Thya.", effects: null }
+            ],
+            choices: [ { text: "Back", nextScene: "archive_intro" } ]
+        },
         // Scene 1: The Bait - Synthya's Archive
         archive_intro: {
-            background: "broken_mug", // Will use bar as placeholder for now
-            music: null,
+            background: "archive",
+            music: "assets/audio/menu.mp3",
             dialogue: [
                 {
                     speaker: "System",
@@ -22,6 +31,12 @@ export const synthyaStory = {
                     emotion: "normal",
                     text: "Another quiet cycle in the Archive. These data-fragments... so many memories, waiting to be restored.",
                     effects: null
+                },
+                {
+                    speaker: "Synthya",
+                    emotion: "normal",
+                    text: "This corruption... it feels... deliberate. Most memory-frags are chaotic. This one is... contained.",
+                    effects: ["glitch"]
                 },
                 {
                     speaker: "System",
@@ -49,14 +64,9 @@ export const synthyaStory = {
                 }
             ],
             choices: [
-                {
-                    text: "Interface with the memory",
-                    nextScene: "memory_trap"
-                },
-                {
-                    text: "Decline the client (Run diagnostics first)",
-                    nextScene: "cannot_decline"
-                }
+                { text: "View 'KAEL - PROJECT ARCHIVE' (Optional)", nextScene: "kael_project_archive" },
+                { text: "Interface with the memory", nextScene: "memory_trap" },
+                { text: "Decline the client (Run diagnostics first)", nextScene: "cannot_decline" }
             ]
         },
         
@@ -87,7 +97,7 @@ export const synthyaStory = {
         
         memory_trap: {
             background: "broken_mug",
-            music: null,
+            music: "assets/audio/game.mp3",
             dialogue: [
                 {
                     speaker: "Synthya",
@@ -108,18 +118,13 @@ export const synthyaStory = {
                     effects: ["glitch"]
                 }
             ],
-            choices: [
-                {
-                    text: "Continue...",
-                    nextScene: "broken_mug_loop_start"
-                }
-            ]
+            choices: [ { text: "Continue...", nextScene: "loop_attempt_1" } ]
         },
         
-        // Scene 2: The Loop - The Broken Mug Cafe
-        broken_mug_loop_start: {
+        // Scene 2: The Loop - The Broken Mug Cafe (Attempt 1)
+        loop_attempt_1: {
             background: "broken_mug",
-            music: null,
+            music: "assets/audio/menu.mp3",
             dialogue: [
                 {
                     speaker: "Synthya",
@@ -147,18 +152,9 @@ export const synthyaStory = {
                 }
             ],
             choices: [
-                {
-                    text: "The next project? What...?",
-                    nextScene: "loop_dialogue_1"
-                },
-                {
-                    text: "Where am I?",
-                    nextScene: "loop_dialogue_2"
-                },
-                {
-                    text: "...Kael?",
-                    nextScene: "loop_dialogue_3"
-                }
+                { text: "The next project? What...?", nextScene: "loop_dialogue_1" },
+                { text: "Where am I?", nextScene: "loop_dialogue_2" },
+                { text: "...Kael?", nextScene: "loop_dialogue_3" }
             ]
         },
         
@@ -185,12 +181,7 @@ export const synthyaStory = {
                     effects: ["flicker"]
                 }
             ],
-            choices: [
-                {
-                    text: "Continue",
-                    nextScene: "loop_reset"
-                }
-            ]
+            choices: [ { text: "Continue", nextScene: "loop_attempt_2" } ]
         },
         
         loop_dialogue_2: {
@@ -216,12 +207,7 @@ export const synthyaStory = {
                     effects: ["flicker"]
                 }
             ],
-            choices: [
-                {
-                    text: "Continue",
-                    nextScene: "loop_reset"
-                }
-            ]
+            choices: [ { text: "Continue", nextScene: "loop_attempt_3" } ]
         },
         
         loop_dialogue_3: {
@@ -247,14 +233,30 @@ export const synthyaStory = {
                     effects: ["flicker"]
                 }
             ],
-            choices: [
-                {
-                    text: "Continue",
-                    nextScene: "loop_reset"
-                }
-            ]
+            choices: [ { text: "Continue", nextScene: "loop_reset" } ]
         },
         
+        loop_attempt_2: {
+            background: "broken_mug",
+            music: "assets/audio/menu2.mp3",
+            dialogue: [
+                { speaker: "Synthya", emotion: "normal", text: "No. He already said that. This is a loop.", effects: ["flicker"] },
+                { speaker: "Kael", emotion: "normal", text: "You made it. Was worried you'd get lost in the rain.", effects: null },
+                { speaker: "Kael", emotion: "normal", text: "*His smile looks fixed* To the next project.", effects: ["flicker"] }
+            ],
+            choices: [ { text: "Continue", nextScene: "loop_dialogue_2" } ]
+        },
+
+        loop_attempt_3: {
+            background: "broken_mug",
+            music: "assets/audio/game.mp3",
+            dialogue: [
+                { speaker: "Synthya", emotion: "sad", text: "The jazz is skipping... the rain is louder.", effects: ["glitch"] },
+                { speaker: "Kael", emotion: "happy", text: "You made it. Was worried you'd get lost in the rain.", effects: ["glitch"] }
+            ],
+            choices: [ { text: "Continue", nextScene: "loop_dialogue_3" } ]
+        },
+
         loop_reset: {
             background: "broken_mug",
             music: null,
@@ -336,31 +338,17 @@ export const synthyaStory = {
                     text: "CORRUPTED AUDIO STREAM DETECTED. Manual repair required.",
                     effects: ["glitch"]
                 },
-                {
-                    speaker: "Synthya",
-                    emotion: "normal",
-                    text: "I can fix this. Just need to cleanse the audio data by inputting the correct sequence...",
-                    effects: null
-                }
+                { speaker: "Synthya", emotion: "normal", text: "I can fix this. Stitch the broken soundwave back together...", effects: null }
             ],
             choices: [
-                {
-                    text: "Start the rhythm puzzle",
-                    nextScene: "jukebox_minigame",
-                    minigame: "hacking_puzzle"
-                }
+                { text: "Start the audio stitch", nextScene: "jukebox_minigame", minigame: "audio_stitch" }
             ]
         },
         
         jukebox_minigame: {
             background: "broken_mug",
             music: null,
-            minigame: {
-                type: "hacking_puzzle",
-                description: "Match the rhythm sequence to cleanse the corrupted audio",
-                difficulty: "medium",
-                onComplete: "jukebox_solved"
-            }
+            minigame: { type: "audio_stitch", description: "Reorder wave segments to repair the song", difficulty: "medium", onComplete: "jukebox_solved" }
         },
         
         jukebox_solved: {
@@ -585,12 +573,7 @@ export const synthyaStory = {
                     effects: null
                 }
             ],
-            choices: [
-                {
-                    text: "Continue",
-                    nextScene: "memory_break"
-                }
-            ]
+            choices: [ { text: "Continue", nextScene: "kael_override" } ]
         },
         
         kael_confrontation: {
@@ -622,14 +605,19 @@ export const synthyaStory = {
                     effects: ["glitch"]
                 }
             ],
-            choices: [
-                {
-                    text: "Continue",
-                    nextScene: "memory_break"
-                }
-            ]
+            choices: [ { text: "Continue", nextScene: "kael_override" } ]
         },
         
+        // Input override puzzle before breaking free
+        kael_override: {
+            background: "broken_mug",
+            music: null,
+            dialogue: [ { speaker: "Synthya", emotion: "normal", text: "Prove it. What was our first project?", effects: ["glitch"] } ],
+            inputPrompt: "[Override: What was your first project?]",
+            inputAnswer: "Project Sundown",
+            nextOnCorrect: "memory_break"
+        },
+
         // Scene 4: Breaking Free
         memory_break: {
             background: "broken_mug",
@@ -714,10 +702,21 @@ export const synthyaStory = {
                 type: "hacking_puzzle",
                 description: "Hack the data-orb before it self-deletes!",
                 difficulty: "hard",
-                onComplete: "chapter_end"
+                onComplete: "stealth_escape"
             }
         },
         
+        // Stealth coda before chapter end
+        stealth_escape: {
+            background: "archive",
+            music: "assets/audio/game.mp3",
+            minigame: {
+                type: "stealth_escape",
+                description: "Move from cover only when the scanner is away",
+                onComplete: "chapter_end"
+            }
+        },
+
         chapter_end: {
             background: "broken_mug",
             music: null,
