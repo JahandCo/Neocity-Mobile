@@ -154,120 +154,22 @@ html, body {
 #dialogue-view.hidden { display: none !important; }
 
 #dialogue-view .dialogue-box {
-    width: 100%;
-    min-height: 200px;
-    max-height: 300px;
-    background: rgba(6, 12, 24, 0.95);
-    border-top: 2px solid rgba(0,255,255,0.4);
-    box-shadow: 
-        0 -4px 30px rgba(0, 255, 255, 0.2),
-        inset 0 1px 0 rgba(255,255,255,0.1);
-    display: flex;
-    align-items: stretch;
-    padding: 0;
-    position: relative;
-    overflow: hidden;
-    pointer-events: all;
-}
-
-#dialogue-view .dialogue-box::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(45deg, 
-        transparent, 
-        rgba(0,255,255,0.1), 
-        transparent, 
-        rgba(148,0,211,0.1), 
-        transparent);
-    background-size: 400% 400%;
-    border-radius: 14px;
-    z-index: -1;
-    animation: borderGlow 8s ease-in-out infinite;
-}
-
-@keyframes borderGlow {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-}
-
-/* System dialogue overlay (for system messages) */
-#dialogue-view .system-overlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.9);
-    border: 2px solid rgba(0,255,255,0.6);
-    border-radius: 12px;
-    padding: 24px 32px;
-    max-width: 600px;
-    text-align: center;
-    box-shadow: 0 0 30px rgba(0,255,255,0.3);
-    z-index: 200;
-    pointer-events: all;
-}
-
-#dialogue-view .system-overlay .system-text {
-    font-size: 18px;
-    color: #00ffff;
-    line-height: 1.6;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: bold;
-}
-
-/* Character display in scene (full body) */
-#dialogue-view .scene-character {
-    position: absolute;
-    bottom: 200px;
-    pointer-events: none;
-    z-index: 50;
-}
-
-#dialogue-view .scene-character.speaking {
-    filter: brightness(1.1) drop-shadow(0 0 15px rgba(0,255,255,0.3));
-}
-
-#dialogue-view .scene-character.player {
-    left: 20%;
-}
-
-#dialogue-view .scene-character.other {
-    right: 20%;
-}
-
-/* Character portraits positioned on left/right of dialogue box */
-#dialogue-view .character-portrait {
-    width: 120px;
-    height: 200px;
-    position: relative;
-    overflow: hidden;
-    background: rgba(0,255,255,0.05);
-    border-right: 1px solid rgba(0,255,255,0.2);
-    flex-shrink: 0;
-}
-
-#dialogue-view .character-portrait.right {
-    border-right: none;
-    border-left: 1px solid rgba(0,255,255,0.2);
-    order: 2;
+    width: min(95%, 1100px);
+    min-height: 320px;
+    background: rgba(10, 10, 30, 0.9);
+    border: 2px solid rgba(0,255,255,0.3);
+    box-shadow: 0 0 40px rgba(0, 255, 255, 0.2);
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+    padding: 24px;
 }
 
 #dialogue-view .character-portrait img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center top;
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6));
-    transition: transform 0.2s ease;
-}
-
-#dialogue-view .character-portrait:hover img {
-    transform: scale(1.02);
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 14px rgba(0,0,0,0.6));
 }
 
 #dialogue-view .dialogue-content {
@@ -279,30 +181,16 @@ html, body {
 }
 
 #dialogue-view .character-name {
-    font-size: 18px;
+    font-size: 24px;
     color: #00ffff;
     margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: bold;
-    text-shadow: 0 0 6px rgba(0,255,255,0.5);
 }
 
 #dialogue-view .dialogue-text {
-    font-size: 16px;
-    line-height: 1.6;
+    font-size: 20px;
+    line-height: 1.7;
     color: #e6faff;
-    min-height: 60px;
-    flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-/* Temporary hover hint style shown when hovering choices */
-#dialogue-view .dialogue-text.hover-hint {
-    font-style: italic;
-    color: #dffaff;
-    opacity: 0.95;
+    min-height: 140px;
 }
 
 #dialogue-view .dialogue-choices {
@@ -313,59 +201,71 @@ html, body {
 }
 
 #dialogue-view .dialogue-choices .choice-btn {
-    background: rgba(0,255,255,0.05);
+    background: transparent;
     border: 2px solid #00ffff;
     color: #00ffff;
-    padding: 8px 16px;
-    font-size: 14px;
+    padding: 10px 18px;
+    font-size: 16px;
     letter-spacing: 1px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    border-radius: 4px;
-    font-family: inherit;
-    text-transform: uppercase;
-    font-weight: 500;
-    position: relative;
-    overflow: hidden;
+    transition: all 0.2s ease;
 }
 
 #dialogue-view .dialogue-choices .choice-btn:hover {
-    background: rgba(0,255,255,0.15);
-    color: #ffffff;
-    box-shadow: 0 0 16px rgba(0,255,255,0.4);
-    transform: translateY(-2px);
-    border-color: rgba(0,255,255,0.8);
+    background: #00ffff;
+    color: #000;
+    box-shadow: 0 0 12px #00ffff;
 }
 
-#dialogue-view .dialogue-choices .choice-btn:active {
-    transform: translateY(0);
-    background: rgba(0,255,255,0.25);
-}
-
-/* Dialogue effects */
+/* Dialogue effects - Enhanced for Phase 1 */
 #dialogue-view.effect-flash::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba(255,255,255,0.7);
-    animation: flashFade 0.4s ease;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.9), rgba(138,43,226,0.4));
+    animation: flashFade 0.5s ease;
     pointer-events: none;
 }
 
 @keyframes flashFade {
-    0% { opacity: 0.9; }
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
     100% { opacity: 0; }
 }
 
 #dialogue-view.effect-glitch .dialogue-box {
-    animation: glitchShift 0.8s steps(4, end);
+    animation: glitchShift 0.8s steps(8, end);
 }
 
 @keyframes glitchShift {
+    0% { transform: translate(0,0); filter: hue-rotate(0deg) saturate(1); }
+    10% { transform: translate(-5px, 2px); filter: hue-rotate(90deg) saturate(2); }
+    20% { transform: translate(5px, -3px); filter: hue-rotate(-90deg) saturate(1.5); }
+    30% { transform: translate(-3px, 3px); filter: hue-rotate(45deg) saturate(2.5); }
+    40% { transform: translate(4px, -2px); filter: hue-rotate(-45deg) saturate(1.8); }
+    50% { transform: translate(-2px, 4px); filter: hue-rotate(120deg) saturate(2.2); }
+    60% { transform: translate(3px, -4px); filter: hue-rotate(-120deg) saturate(1.6); }
+    80% { transform: translate(-4px, 1px); filter: hue-rotate(30deg) saturate(1.3); }
+    100% { transform: translate(0,0); filter: hue-rotate(0deg) saturate(1); }
+}
+
+/* Add RGB split effect for glitch */
+#dialogue-view.effect-glitch .dialogue-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: inherit;
+    opacity: 0.8;
+    animation: rgbSplit 0.8s steps(4, end);
+    mix-blend-mode: screen;
+    pointer-events: none;
+}
+
+@keyframes rgbSplit {
     0% { transform: translate(0,0); filter: hue-rotate(0deg); }
-    25% { transform: translate(-3px, 1px); filter: hue-rotate(20deg); }
-    50% { transform: translate(3px, -2px); filter: hue-rotate(-20deg); }
-    75% { transform: translate(-1px, 2px); filter: hue-rotate(10deg); }
+    25% { transform: translate(3px, 0); filter: hue-rotate(180deg); }
+    50% { transform: translate(-3px, 0); filter: hue-rotate(90deg); }
+    75% { transform: translate(0, 3px); filter: hue-rotate(270deg); }
     100% { transform: translate(0,0); filter: hue-rotate(0deg); }
 }
 
@@ -373,15 +273,42 @@ html, body {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, rgba(0,255,255,0) 0%, rgba(0,255,255,0.12) 50%, rgba(0,255,255,0) 100%);
-    background-size: 100% 6px;
-    animation: scanlineMove 1.4s linear infinite;
+    background: linear-gradient(to bottom, rgba(0,255,255,0) 0%, rgba(0,255,255,0.25) 48%, rgba(255,255,255,0.4) 50%, rgba(0,255,255,0.25) 52%, rgba(0,255,255,0) 100%);
+    background-size: 100% 30px;
+    animation: scanlineMove 2s linear infinite;
     pointer-events: none;
 }
 
 @keyframes scanlineMove {
-    0% { background-position-y: 0; }
-    100% { background-position-y: 100%; }
+    0% { background-position-y: -30px; }
+    100% { background-position-y: calc(100% + 30px); }
+}
+
+/* Static noise overlay for scan effect */
+#dialogue-view.effect-scan::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+        repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, transparent 1px, transparent 2px, rgba(0,0,0,0.15) 3px),
+        repeating-linear-gradient(90deg, rgba(0,0,0,0.15) 0px, transparent 1px, transparent 2px, rgba(0,0,0,0.15) 3px);
+    opacity: 0.3;
+    animation: staticNoise 0.1s steps(10) infinite;
+    pointer-events: none;
+}
+
+@keyframes staticNoise {
+    0% { transform: translate(0, 0); }
+    10% { transform: translate(-1px, 1px); }
+    20% { transform: translate(1px, -1px); }
+    30% { transform: translate(-1px, -1px); }
+    40% { transform: translate(1px, 1px); }
+    50% { transform: translate(0, -1px); }
+    60% { transform: translate(-1px, 0); }
+    70% { transform: translate(1px, 0); }
+    80% { transform: translate(0, 1px); }
+    90% { transform: translate(-1px, -1px); }
+    100% { transform: translate(1px, 1px); }
 }
 
 /* --- Enhanced Overlay Styling --- */
@@ -625,6 +552,164 @@ html, body {
 .input-prompt .text-entry { padding:10px 12px; border:1px solid #00ffff; background:rgba(0,0,0,0.4); color:#e6faff; }
 .input-error { color:#ff6b6b; margin-left: 8px; }
 .shake { animation: shakeAnim 0.4s ease; }
+
+@keyframes shakeAnim {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* Primary and Secondary Button Styles */
+.primary-btn, .secondary-btn {
+    padding: 12px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, #00ffff 0%, #00aaff 100%);
+    color: #000;
+    box-shadow: 0 4px 15px rgba(0, 255, 255, 0.4);
+}
+
+.primary-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.primary-btn:hover::before {
+    left: 100%;
+}
+
+.primary-btn:hover {
+    box-shadow: 0 6px 25px rgba(0, 255, 255, 0.6);
+    transform: translateY(-2px);
+}
+
+.primary-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(0, 255, 255, 0.4);
+}
+
+.secondary-btn {
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.8) 0%, rgba(88, 28, 135, 0.8) 100%);
+    color: #fff;
+    border: 2px solid rgba(138, 43, 226, 0.6);
+    box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3);
+}
+
+.secondary-btn:hover {
+    background: linear-gradient(135deg, rgba(138, 43, 226, 1) 0%, rgba(88, 28, 135, 1) 100%);
+    box-shadow: 0 6px 25px rgba(138, 43, 226, 0.5);
+    transform: translateY(-2px);
+}
+
+.secondary-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(138, 43, 226, 0.3);
+}
+
+/* Enhanced Simon Pad Styling */
+.simon-pad {
+    width: 120px; 
+    height: 120px; 
+    border-radius: 14px; 
+    border: 3px solid rgba(255,255,255,0.3);
+    background: color-mix(in srgb, var(--pad-color, #00ffff) 65%, #000 35%);
+    box-shadow: 
+        0 0 20px rgba(0,0,0,0.5), 
+        inset 0 0 12px rgba(255,255,255,0.15),
+        0 0 30px color-mix(in srgb, var(--pad-color, #00ffff) 40%, transparent 60%);
+    color: #0a0a0a; 
+    font-weight: 700; 
+    font-size: 24px;
+    cursor: pointer; 
+    transition: all 0.15s ease;
+    text-shadow: 0 0 5px rgba(255,255,255,0.5);
+}
+
+.simon-pad:hover {
+    transform: scale(1.05);
+    border-color: rgba(255,255,255,0.5);
+}
+
+.simon-pad.active { 
+    filter: brightness(1.8) saturate(1.4); 
+    transform: scale(1.08); 
+    box-shadow: 
+        0 0 40px color-mix(in srgb, var(--pad-color, #00ffff) 80%, transparent 20%),
+        inset 0 0 20px rgba(255,255,255,0.3);
+}
+
+/* Enhanced Pipe Cell Styling */
+.pipe-cell {
+    width: 88px; 
+    height: 88px; 
+    border-radius: 12px; 
+    border: 3px solid rgba(0,255,255,0.4);
+    background: radial-gradient(100% 100% at 50% 0%, rgba(0,255,255,0.12), rgba(0,0,0,0.7));
+    position: relative; 
+    cursor: pointer; 
+    box-shadow: 
+        inset 0 0 25px rgba(0,255,255,0.15),
+        0 4px 15px rgba(0,0,0,0.4);
+    transition: all 0.2s ease;
+}
+
+.pipe-cell:hover {
+    border-color: rgba(0,255,255,0.6);
+    box-shadow: 
+        inset 0 0 30px rgba(0,255,255,0.2),
+        0 6px 20px rgba(0,255,255,0.3);
+    transform: scale(1.05);
+}
+
+/* Enhanced Wave Segment Styling */
+.wave-segment {
+    width: 70px; 
+    height: 100px; 
+    border-radius: 12px; 
+    border: 3px solid rgba(0,255,255,0.4);
+    background: conic-gradient(from calc(var(--phase,0) * 45deg), rgba(0,255,255,0.3), rgba(148,0,211,0.35), rgba(0,255,255,0.3));
+    box-shadow: 
+        inset 0 0 25px rgba(0,255,255,0.15),
+        0 4px 15px rgba(0,0,0,0.4);
+    cursor: pointer; 
+    position: relative; 
+    overflow:hidden;
+    transition: all 0.2s ease;
+}
+
+.wave-segment:hover {
+    transform: scale(1.05);
+    border-color: rgba(0,255,255,0.6);
+    box-shadow: 
+        inset 0 0 30px rgba(0,255,255,0.2),
+        0 6px 20px rgba(0,255,255,0.3);
+}
+
+.wave-segment.selected { 
+    outline: 3px solid #00ffff; 
+    outline-offset: 2px;
+    box-shadow: 
+        0 0 25px #00ffff,
+        inset 0 0 30px rgba(0,255,255,0.3);
+    transform: scale(1.08);
+}
 @keyframes shakeAnim { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)} 40%{transform:translateX(5px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)} }
 
 /* Stealth minigame */
@@ -633,70 +718,3 @@ html, body {
 .stealth-area .seeker::before { content:''; position:absolute; top:0; bottom:0; width: 40%; left: calc(var(--phase, 0) * 100% - 20%); background: linear-gradient(90deg, transparent, rgba(255,0,0,0.18), transparent); filter: blur(4px); }
 .stealth-area .cover { width: 100%; height: 10px; background: linear-gradient(90deg, rgba(0,255,255,0.4) 20%, rgba(148,0,211,0.4) 80%); margin-bottom: 12px; }
 .stealth-area #stealth-status { min-height: 20px; margin-top: 8px; color: #e6faff; }
-
-/* --- Minigame Visual Feedback --- */
-.minigame-success {
-    animation: successFade 0.3s ease-out;
-}
-
-@keyframes successFade {
-    0% { opacity: 1; transform: scale(1); }
-    100% { opacity: 0; transform: scale(1.05); }
-}
-
-.particle-burst {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2rem;
-    pointer-events: none;
-    z-index: 100;
-}
-
-.particle-burst.success {
-    animation: burstSuccess 1s ease-out forwards;
-}
-
-@keyframes burstSuccess {
-    0% { 
-        opacity: 1; 
-        transform: translate(-50%, -50%) scale(0.5); 
-    }
-    50% { 
-        opacity: 1; 
-        transform: translate(-50%, -50%) scale(1.2); 
-        text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
-    }
-    100% { 
-        opacity: 0; 
-        transform: translate(-50%, -50%) scale(1.5); 
-    }
-}
-
-.glitch-flash {
-    animation: glitchFlash 0.6s ease-out;
-}
-
-@keyframes glitchFlash {
-    0%, 100% { 
-        filter: none; 
-        transform: none; 
-    }
-    20% { 
-        filter: hue-rotate(180deg) brightness(1.5); 
-        transform: translate(-2px, 1px); 
-    }
-    40% { 
-        filter: hue-rotate(-90deg) brightness(0.8); 
-        transform: translate(2px, -1px); 
-    }
-    60% { 
-        filter: hue-rotate(90deg) brightness(1.2); 
-        transform: translate(-1px, 2px); 
-    }
-    80% { 
-        filter: hue-rotate(45deg) brightness(0.9); 
-        transform: translate(1px, -2px); 
-    }
-}

@@ -251,6 +251,7 @@ class Game {
         Object.assign(this.world, { barX, barY, barW, barH });
 
         // Player placement and size
+        // Synthya sprite spec: width 362px, height 535px (aspect ratio ~0.677)
         if (this.player.img) {
             // Target sprite size requested by design
             const DESIRED_W = 362;
