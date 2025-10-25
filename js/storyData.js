@@ -65,7 +65,7 @@ export const synthyaStory = {
             ],
             choices: [
                 { text: "View 'KAEL - PROJECT ARCHIVE' (Optional)", nextScene: "kael_project_archive" },
-                { text: "Interface with the memory", nextScene: "memory_trap" },
+                { text: "Interface with the memory", nextScene: "memory_trap", hoverSfx: "assets/audio/whispers.mp3" },
                 { text: "Decline the client (Run diagnostics first)", nextScene: "cannot_decline" }
             ]
         },

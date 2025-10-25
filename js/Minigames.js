@@ -38,6 +38,7 @@ export class Minigames {
 
     // --- Hacking (Simon) ---
     static buildSimon(container, def, done) {
+        const sfx = (p, vol=0.9) => { try { const a=new Audio(p); a.volume=vol; a.play(); } catch {} };
         const difficulty = (def.difficulty || 'medium').toLowerCase();
         const seqLen = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 6 : 4;
         const pads = [
@@ -100,12 +101,14 @@ export class Minigames {
                 highlight(el);
                 if (id !== sequence[index]) {
                     statusEl.textContent = 'Wrong! Replaying...';
+                    sfx('assets/audio/wrong.mp3');
                     setTimeout(playSequence, 800);
                     return;
                 }
                 index++;
                 if (index >= sequence.length) {
                     statusEl.textContent = 'Cleansed!';
+                    sfx('assets/audio/select.mp3');
                     setTimeout(done, 500);
                 }
             });
@@ -114,6 +117,7 @@ export class Minigames {
 
     // --- Memory (Pipes rotation) ---
     static buildPipes(container, def, done) {
+        const sfx = (p, vol=0.9) => { try { const a=new Audio(p); a.volume=vol; a.play(); } catch {} };
         // 3x3 grid with a predefined solvable layout
         const SIZE = 3;
         // Tile types define connectors as set of directions: N,E,S,W
@@ -209,6 +213,7 @@ export class Minigames {
             render();
             if (solved()) {
                 statusEl.textContent = 'Circuit Restored!';
+                sfx('assets/audio/select.mp3');
                 setTimeout(done, 500);
             }
         };
@@ -224,6 +229,7 @@ export class Minigames {
             board.forEach(row => row.forEach(t => { t.rot = Math.floor(Math.random()*4)% (TYPES[t.type].length); }));
             statusEl.textContent='';
             render();
+            sfx('assets/audio/select.mp3', 0.6);
         });
 
         render();
@@ -231,6 +237,7 @@ export class Minigames {
 
     // --- Audio Stitch (wave reorder) ---
     static buildAudioStitch(container, def, done) {
+        const sfx = (p, vol=0.9) => { try { const a=new Audio(p); a.volume=vol; a.play(); } catch {} };
         const SEGMENTS = 5;
         const order = Array.from({length: SEGMENTS}, (_,i)=>i);
         // Shuffle
@@ -261,7 +268,7 @@ export class Minigames {
                     if (other) other.classList.remove('selected');
                     [order[first], order[pos]] = [order[pos], order[first]];
                     first=null; render();
-                    if (order.every((v,i)=>v===i)) { status.textContent='Audio Restored!'; setTimeout(done, 500); }
+                    if (order.every((v,i)=>v===i)) { status.textContent='Audio Restored!'; sfx('assets/audio/select.mp3'); setTimeout(done, 500); }
                 });
                 grid.appendChild(seg);
             });
@@ -271,6 +278,7 @@ export class Minigames {
 
     // --- Stealth Escape (simple timing) ---
     static buildStealth(container, def, done) {
+        const sfx = (p, vol=0.9) => { try { const a=new Audio(p); a.volume=vol; a.play(); } catch {} };
         const stepsRequired = 3;
         let steps = 0;
         let safe = false;
@@ -301,9 +309,11 @@ export class Minigames {
             if (safe) {
                 steps++;
                 status.textContent = `Moved (${steps}/${stepsRequired})`;
-                if (steps>=stepsRequired) { cancelAnimationFrame(timer); setTimeout(done, 300); }
+                sfx('assets/audio/select.mp3', 0.7);
+                if (steps>=stepsRequired) { cancelAnimationFrame(timer); setTimeout(()=>{ sfx('assets/audio/select.mp3'); done(); }, 300); }
             } else {
                 status.textContent = 'Detected! Wait for the scan to pass.';
+                sfx('assets/audio/alert.mp3', 0.9);
             }
         });
     }

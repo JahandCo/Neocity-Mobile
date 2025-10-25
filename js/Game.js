@@ -66,7 +66,7 @@ class Game {
         const overlayClose = document.getElementById('overlay-close');
         const menuView = this.views['menu'];
 
-        // Background music playlist (menu.mp3 -> menu2.mp3 -> repeat)
+    // Background music playlist (menu.mp3 -> menu2.mp3 -> repeat) for Menu & Character Select
         this.bgMusicEl = bgMusic;
         this.bgPlaylist = ['assets/audio/menu.mp3', 'assets/audio/menu2.mp3'];
         this.bgIndex = 0;
@@ -100,6 +100,31 @@ class Game {
             }
             this.bgIndex = 0;
         };
+
+        // In-game music (loops game.mp3) for World & Dialogue
+        this.gameMusicEl = new Audio('assets/audio/game.mp3');
+        this.gameMusicEl.loop = true;
+        this.gameMusicEl.volume = 0.6;
+        this.startGameMusic = async () => {
+            try {
+                this.gameMusicEl.muted = false;
+                await this.gameMusicEl.play();
+            } catch (e) { /* requires gesture */ }
+        };
+        this.stopGameMusic = () => {
+            try { this.gameMusicEl.pause(); } catch {}
+            this.gameMusicEl.currentTime = 0;
+        };
+
+        // UI click sound for any button press
+        this.uiClickSrc = 'assets/audio/select.mp3';
+        const clickSfxHandler = (e) => {
+            const el = e.target.closest && e.target.closest('button');
+            if (!el) return;
+            // play a short overlapping-safe click sound
+            try { const s = new Audio(this.uiClickSrc); s.volume = 0.8; s.play(); } catch {}
+        };
+        document.addEventListener('click', clickSfxHandler, true);
 
         if (backToMenu) backToMenu.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); this.changeState('menu'); });
         if (storyBtn) {
@@ -169,14 +194,23 @@ class Game {
             this.views[newState].classList.remove('hidden');
             this.gameState = newState;
             if (newState === 'world') this.resizeCanvas();
-            // Start/stop menu dynamic background appropriately
-            if (newState === 'menu') {
+            // Start/stop backgrounds and music based on state
+            if (newState === 'menu' || newState === 'character-select') {
                 this.menuBackground && this.menuBackground.start();
                 // Try to start music (will only work after a gesture)
                 (async ()=>{ try { await this.startMenuMusic(); } catch {} })();
+                // Stop in-game music if any
+                this.stopGameMusic();
             } else {
                 this.menuBackground && this.menuBackground.stop();
+                // Stop menu music when leaving menu/character select
                 this.stopMenuMusic();
+                // Start in-game music for world/dialogue
+                if (newState === 'world' || newState === 'dialogue') {
+                    (async ()=>{ try { await this.startGameMusic(); } catch {} })();
+                } else {
+                    this.stopGameMusic();
+                }
             }
         }
     }
@@ -322,11 +356,11 @@ class Game {
     // --- Assets ---
     loadWorldAssets() {
         const bg = new Image();
-        bg.src = 'assets/images/scenes/background.png';
+        bg.src = 'assets/images/scenes/far-background.png';
         bg.onload = () => { this.world.backgroundImg = bg; };
 
         const bar = new Image();
-        bar.src = 'assets/images/scenes/the-broken-mug.png';
+        bar.src = 'assets/images/scenes/bar-middle.png';
         bar.onload = () => { this.world.barImg = bar; this.layoutScene(); };
 
         const juke = new Image();

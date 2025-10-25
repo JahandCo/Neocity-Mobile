@@ -47,6 +47,13 @@ export class Dialogue {
         if (sceneId === 'sign_solved') {
             if (this.game && this.game.flags) this.game.flags.signFixed = true;
         }
+        // One-shot SFX on specific scenes
+        if (sceneId === 'archive_intro') {
+            this.playSfx('assets/audio/whispers.mp3');
+        }
+        if (sceneId === 'memory_trap') {
+            this.playSfx('assets/audio/alert.mp3');
+        }
         this.currentSceneId = sceneId;
         this.currentNodes = scene.dialogue || [];
         this.nodeIndex = 0;
@@ -57,12 +64,8 @@ export class Dialogue {
         } else {
             this.view.style.background = 'rgba(0,0,0,0.4)';
         }
-        // Start scene music if provided
-        if (scene.music) {
-            this.playMusic(scene.music);
-        } else {
-            this.stopMusic();
-        }
+        // Music is managed globally by Game (menu vs in-game). Ensure local music is stopped.
+        this.stopMusic();
         // Apply any entry effects immediately
         if (scene.effectsOnStart && Array.isArray(scene.effectsOnStart)) {
             this.applyEffects(scene.effectsOnStart);
@@ -207,8 +210,8 @@ export class Dialogue {
         if (!key) return null;
         // Map logical keys to asset paths
         const map = {
-            'broken_mug': 'assets/images/scenes/the-broken-mug.png',
-            'archive': 'assets/images/scenes/background.png'
+            'broken_mug': 'assets/images/scenes/bar-middle.png',
+            'archive': 'assets/images/scenes/archive.png'
         };
         return map[key] || null;
     }
@@ -246,11 +249,13 @@ export class Dialogue {
         submit.addEventListener('click', (e) => {
             e.stopPropagation();
             if (normalize(input.value) === normalize(scene.inputAnswer)) {
+                this.playSfx('assets/audio/select.mp3');
                 this.loadScene(scene.nextOnCorrect);
             } else {
                 error.style.display = 'block';
                 wrapper.classList.add('shake');
                 setTimeout(()=>wrapper.classList.remove('shake'), 400);
+                this.playSfx('assets/audio/wrong.mp3');
             }
         });
     }
