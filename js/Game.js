@@ -18,7 +18,15 @@ class Game {
         };
 
         // --- Player (Synthya) ---
-        this.player = { x: 0, y: 0, targetX: 0, targetY: 0, speed: 3, img: null, w: 0, h: 0 };
+        this.player = { 
+            x: 0, y: 0, targetX: 0, targetY: 0, speed: 4, 
+            img: null, w: 0, h: 0,
+            // Sprite animation properties (will be set when image loads)
+            frameX: 0, frameY: 0, frameWidth: 0, frameHeight: 0,
+            totalFrames: 4, currentFrame: 0, frameTimer: 0, frameDelay: 6,
+            isMoving: false, direction: 'right',
+            spritesheetCols: 4, spritesheetRows: 2
+        };
 
         // --- Progress Flags (puzzle state) ---
         this.flags = {
@@ -55,6 +63,22 @@ class Game {
 
         // --- Input ---
         this.canvas.addEventListener('click', (e) => this.handleWorldClick(e));
+        
+        // Touch support for mobile
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const fakeEvent = {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            };
+            this.handleWorldClick(fakeEvent);
+        });
+        
+        // Keyboard controls
+        this.keys = {};
+        document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+        document.addEventListener('keyup', (e) => this.handleKeyUp(e));
 
         // --- Menu Buttons ---
         const bgMusic = document.getElementById('bg-music');
@@ -222,67 +246,102 @@ class Game {
         const barW = this.canvas.width * 0.8;
         const barH = barW * aspect;
         const barX = (this.canvas.width - barW) / 2;
+        // Position bar on the ground (bottom of screen)
         const barY = this.canvas.height - barH;
         Object.assign(this.world, { barX, barY, barW, barH });
 
         // Player placement and size
         // Synthya sprite spec: width 362px, height 535px (aspect ratio ~0.677)
         if (this.player.img) {
-            const targetHeight = Math.max(200, this.canvas.height * 0.32);
-            const synthyaAspect = 362 / 535; // Use spec dimensions for proper aspect
-            const targetWidth = targetHeight * synthyaAspect;
-            this.player.w = targetWidth;
-            this.player.h = targetHeight;
+            // Target sprite size requested by design
+            const DESIRED_W = 362;
+            const DESIRED_H = 535;
+
+            // Compute a responsive scale so the sprite fits on small viewports
+            const maxH = Math.max(200, this.canvas.height * 0.5); // allow reasonable max height
+            const maxW = Math.max(140, this.canvas.width * 0.3);
+            const scaleH = maxH / DESIRED_H;
+            const scaleW = maxW / DESIRED_W;
+            // Use the smaller scale to ensure we never overflow available UI space
+            const useScale = Math.min(1, scaleH, scaleW);
+
+            const pW = Math.round(DESIRED_W * useScale);
+            const pH = Math.round(DESIRED_H * useScale);
+
+            this.player.w = pW; this.player.h = pH;
+            // Position player standing on the ground in front of the bar
             if (this.player.y === 0) {
                 this.player.x = barX + barW * 0.2;
-                this.player.y = barY + barH - targetHeight;
+                // Place character standing on the ground, full body visible
+                this.player.y = this.canvas.height - pH; 
                 this.player.targetX = this.player.x;
                 this.player.targetY = this.player.y;
             } else {
-                // Keep baseline
-                this.player.y = barY + barH - targetHeight;
+                // Keep character grounded
+                this.player.y = this.canvas.height - pH;
             }
         }
 
-        // Kael placement
+        // Kael placement (bartender behind the counter)
         if (this.world.kaelImg) {
-            const kH = Math.max(170, this.canvas.height * 0.30);
+            const kH = Math.max(200, this.canvas.height * 0.4);
             const kScale = kH / this.world.kaelImg.height;
             const kW = this.world.kaelImg.width * kScale;
-            const kX = barX + barW * 0.7;
-            const kY = barY + barH - kH;
+            // Position Kael behind the bar as the bartender, standing on ground
+            const kX = barX + barW * 0.65;
+            // Place Kael standing on the ground behind the bar
+            const kY = this.canvas.height - kH;
             Object.assign(this.world, { kaelX: kX, kaelY: kY, kaelW: kW, kaelH: kH });
         }
 
-        // Jukebox
+        // Jukebox (positioned on the floor to the left)
         if (this.world.jukeboxImg) {
-            const jH = Math.max(140, this.canvas.height * 0.22);
+            const jH = Math.max(160, this.canvas.height * 0.3);
             const jScale = jH / this.world.jukeboxImg.height;
             const jW = this.world.jukeboxImg.width * jScale;
-            const jX = barX + barW * 0.05;
-            const jY = barY + barH - jH;
+            // Position jukebox on the left side, standing on the ground
+            const jX = barX - jW * 0.5; // Position to the left of the bar
+            const jY = this.canvas.height - jH; // Standing on the ground
             Object.assign(this.world, { jukeX: jX, jukeY: jY, jukeW: jW, jukeH: jH });
         }
 
-        // Neon sign
+        // Neon sign (hanging above the bar)
         if (this.world.signImg) {
-            const sW = Math.max(140, this.canvas.width * 0.18);
+            const sW = Math.max(180, this.canvas.width * 0.22);
             const sAspect = this.world.signImg.height / this.world.signImg.width;
             const sH = sW * sAspect;
-            const sX = barX + barW - sW - 16;
-            const sY = barY + 16;
+            // Position sign hanging above the bar center
+            const sX = barX + (barW - sW) / 2; // Center above bar
+            const sY = barY - sH - 20; // Hang above the bar with some gap
             Object.assign(this.world, { signX: sX, signY: sY, signW: sW, signH: sH });
         }
     }
 
     // --- Input ---
+    handleKeyDown(event) {
+        if (this.gameState !== 'world') return;
+        this.keys[event.code] = true;
+        
+        // Prevent default for arrow keys and WASD
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'KeyA', 'KeyS', 'KeyD', 'KeyW'].includes(event.code)) {
+            event.preventDefault();
+        }
+    }
+    
+    handleKeyUp(event) {
+        if (this.gameState !== 'world') return;
+        this.keys[event.code] = false;
+    }
+
     handleWorldClick(event) {
         if (this.gameState !== 'world') return;
         const rect = this.canvas.getBoundingClientRect();
         const clickX = event.clientX - rect.left;
         const clickY = event.clientY - rect.top;
+        // Set target position on the ground in front of the bar
         this.player.targetX = clickX;
-        this.player.targetY = this.world.barY + this.world.barH - this.player.h;
+        this.player.targetY = this.canvas.height - this.player.h;
+        this.player.isMoving = true;
         // Hotspots: Jukebox, Neon Sign, Kael
         if (this.pointInJukebox(clickX, clickY)) {
             if (this.flags.jukeboxFixed) {
@@ -313,45 +372,118 @@ class Game {
 
     // --- Simulation ---
     updateWorld() {
-        const dx = this.player.targetX - this.player.x;
-        const dy = this.player.targetY - this.player.y;
-        const distance = Math.hypot(dx, dy);
-        if (distance > this.player.speed) {
-            this.player.x += (dx / distance) * this.player.speed;
-            this.player.y += (dy / distance) * this.player.speed;
-        } else {
-            this.player.x = this.player.targetX;
-            this.player.y = this.player.targetY;
+        this.handlePlayerMovement();
+        this.updatePlayerAnimation();
+        this.constrainPlayerPosition();
+    }
+    
+    handlePlayerMovement() {
+        let moving = false;
+        const moveSpeed = this.player.speed;
+        
+        // Keyboard movement
+        if (this.keys['ArrowLeft'] || this.keys['KeyA']) {
+            this.player.x -= moveSpeed;
+            this.player.direction = 'left';
+            moving = true;
         }
-        const left = this.world.barX + 10;
-        const right = this.world.barX + this.world.barW - this.player.w - 10;
-        if (this.player.x < left) this.player.x = left;
-        if (this.player.x > right) this.player.x = right;
+        if (this.keys['ArrowRight'] || this.keys['KeyD']) {
+            this.player.x += moveSpeed;
+            this.player.direction = 'right';
+            moving = true;
+        }
+        
+        // Click-to-move
+        if (!moving) {
+            const dx = this.player.targetX - this.player.x;
+            const distance = Math.abs(dx);
+            
+            if (distance > this.player.speed) {
+                const moveX = dx > 0 ? this.player.speed : -this.player.speed;
+                this.player.x += moveX;
+                this.player.direction = dx > 0 ? 'right' : 'left';
+                moving = true;
+            } else if (distance > 1) {
+                // Close enough, snap to target
+                this.player.x = this.player.targetX;
+            }
+        }
+        
+        this.player.isMoving = moving;
+    }
+    
+    updatePlayerAnimation() {
+        if (this.player.isMoving) {
+            // Animate walking frames
+            this.player.frameTimer++;
+            if (this.player.frameTimer >= this.player.frameDelay) {
+                this.player.frameTimer = 0;
+                this.player.currentFrame = (this.player.currentFrame + 1) % this.player.totalFrames;
+            }
+        } else {
+            // Idle frame (first frame)
+            this.player.currentFrame = 0;
+            this.player.frameTimer = 0;
+        }
+        
+        // Set sprite frame position
+        // Assuming spritesheet layout: [idle, walk1, walk2, walk3] for each direction
+        this.player.frameX = this.player.currentFrame * this.player.frameWidth;
+        
+        // Row 0 = right facing, Row 1 = left facing (or vice versa)
+        this.player.frameY = this.player.direction === 'left' ? this.player.frameHeight : 0;
+    }
+    
+    constrainPlayerPosition() {
+        // Constrain player movement to reasonable area in front of the bar
+        const leftBound = Math.max(20, this.world.jukeX + this.world.jukeW + 10);
+        const rightBound = this.world.barX + this.world.barW - this.player.w - 20;
+        if (this.player.x < leftBound) this.player.x = leftBound;
+        if (this.player.x > rightBound) this.player.x = rightBound;
+        // Keep player on the ground
+        this.player.y = this.canvas.height - this.player.h;
+        this.player.targetY = this.player.y;
     }
 
-    // --- Rendering ---
+        // --- Rendering ---
     drawWorld() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Layer 1: Far background (behind everything)
         if (this.world.backgroundImg) {
             this.ctx.drawImage(this.world.backgroundImg, 0, 0, this.canvas.width, this.canvas.height);
         } else {
             this.ctx.fillStyle = '#111';
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
+        
+        // Layer 2: Bar structure (foundation/floor level)
         if (this.world.barImg) {
+            console.log('Drawing bar at:', this.world.barX, this.world.barY, this.world.barW, this.world.barH, 'Canvas height:', this.canvas.height);
             this.ctx.drawImage(this.world.barImg, this.world.barX, this.world.barY, this.world.barW, this.world.barH);
         }
+        
+        // Layer 3: Background elements (jukebox on the floor)
         if (this.world.jukeboxImg) {
             this.ctx.drawImage(this.world.jukeboxImg, this.world.jukeX, this.world.jukeY, this.world.jukeW, this.world.jukeH);
         }
-        if (this.world.signImg) {
-            this.ctx.drawImage(this.world.signImg, this.world.signX, this.world.signY, this.world.signW, this.world.signH);
-        }
+        
+        // Layer 4: Characters (standing on the ground)
         if (this.player.img) {
-            this.ctx.drawImage(this.player.img, this.player.x, this.player.y, this.player.w, this.player.h);
+            // Draw specific frame from spritesheet
+            this.ctx.drawImage(
+                this.player.img,
+                this.player.frameX, this.player.frameY, this.player.frameWidth, this.player.frameHeight, // Source frame
+                this.player.x, this.player.y, this.player.w, this.player.h // Destination
+            );
         }
         if (this.world.kaelImg) {
             this.ctx.drawImage(this.world.kaelImg, this.world.kaelX, this.world.kaelY, this.world.kaelW, this.world.kaelH);
+        }
+        
+        // Layer 5: Hanging elements (sign above the bar)
+        if (this.world.signImg) {
+            this.ctx.drawImage(this.world.signImg, this.world.signX, this.world.signY, this.world.signW, this.world.signH);
         }
     }
 
@@ -378,8 +510,15 @@ class Game {
         kael.onload = () => { this.world.kaelImg = kael; this.layoutScene(); };
 
         const syn = new Image();
-        syn.src = 'assets/images/characters/synthya/synthya.png';
-        syn.onload = () => { this.player.img = syn; this.layoutScene(); };
+        syn.src = 'assets/images/characters/synthya/synthya-spritesheet.png';
+        syn.onload = () => { 
+            this.player.img = syn; 
+            // Calculate frame dimensions from spritesheet
+            this.player.frameWidth = syn.width / this.player.spritesheetCols;
+            this.player.frameHeight = syn.height / this.player.spritesheetRows;
+            console.log('Spritesheet loaded:', syn.width, 'x', syn.height, 'Frame size:', this.player.frameWidth, 'x', this.player.frameHeight);
+            this.layoutScene(); 
+        };
     }
 
     pointInKael(x, y) {

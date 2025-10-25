@@ -66,4 +66,21 @@ export class ParticleAnimation {
         });
         requestAnimationFrame(() => this.animate());
     }
+
+    // Add particle burst effect for minigame success
+    static createSuccessBurst(element) {
+        const burst = document.createElement('div');
+        burst.className = 'particle-burst success';
+        burst.innerHTML = '✨';
+        element.appendChild(burst);
+        
+        // Remove after animation
+        setTimeout(() => burst.remove(), 1000);
+    }
+
+    // Add glitch effect for failures  
+    static createGlitchEffect(element) {
+        element.classList.add('glitch-flash');
+        setTimeout(() => element.classList.remove('glitch-flash'), 600);
+    }
 }

@@ -6,7 +6,8 @@ export class Dialogue {
     constructor(game) {
         this.game = game;
         this.view = document.getElementById('dialogue-view');
-        this.portraitEl = this.view.querySelector('.character-portrait');
+        this.leftPortraitEl = this.view.querySelector('.character-portrait.left');
+        this.rightPortraitEl = this.view.querySelector('.character-portrait.right');
         this.nameEl = this.view.querySelector('.character-name');
         this.textEl = this.view.querySelector('.dialogue-text');
         this.choicesEl = this.view.querySelector('.dialogue-choices');
@@ -40,6 +41,10 @@ export class Dialogue {
             console.error('Scene not found:', sceneId);
             return this.game.endDialogue();
         }
+
+        // Clean up any existing system overlays
+        const existingOverlays = this.view.querySelectorAll('.system-overlay');
+        existingOverlays.forEach(overlay => overlay.remove());
         // Update game flags on entering solved states
         if (sceneId === 'jukebox_solved') {
             if (this.game && this.game.flags) this.game.flags.jukeboxFixed = true;
@@ -70,6 +75,9 @@ export class Dialogue {
         if (scene.effectsOnStart && Array.isArray(scene.effectsOnStart)) {
             this.applyEffects(scene.effectsOnStart);
         }
+
+        // Show characters in scene if specified
+        this.updateSceneCharacters(scene);
         // If scene is a minigame scene definition, run it instead
         if (scene.minigame) {
             Minigames.run(scene.minigame, () => {
@@ -99,19 +107,38 @@ export class Dialogue {
             // End of scene dialogue; show choices or end
             return this.renderChoicesOrEnd();
         }
-        // Text & name
+
+        // Check if this is a system message
+        if (node.speaker === 'System') {
+            this.renderSystemMessage(node);
+            return;
+        }
+
+        // Regular dialogue
         this.textEl.textContent = node.text || '';
         this.nameEl.textContent = node.speaker || '';
 
-        // Portrait by speaker/emotion
-        this.portraitEl.innerHTML = '';
+        // Clear both portraits first
+        this.leftPortraitEl.innerHTML = '';
+        this.rightPortraitEl.innerHTML = '';
+
+        // Determine portrait position based on speaker
         const imgSrc = this.getPortrait(node.speaker, node.emotion);
         if (imgSrc) {
             const img = document.createElement('img');
             img.src = imgSrc;
             img.alt = node.speaker || 'Speaker';
-            this.portraitEl.appendChild(img);
+            
+            // Player character (Synthya) goes on left, others on right
+            if (node.speaker && node.speaker.toLowerCase() === 'synthya') {
+                this.leftPortraitEl.appendChild(img);
+            } else {
+                this.rightPortraitEl.appendChild(img);
+            }
         }
+
+        // Highlight speaking character in scene
+        this.highlightSpeakingCharacter(node.speaker);
 
         // Effects
         this.applyEffects(node.effects || []);
@@ -137,9 +164,63 @@ export class Dialogue {
                 if (choice.hoverSfx) {
                     btn.addEventListener('mouseenter', () => this.playSfx(choice.hoverSfx));
                 }
+                // Optional hover hint text (temporary UI hint shown in the dialogue text area)
+                if (choice.hoverHint) {
+                    btn.addEventListener('mouseenter', () => this.showHoverHint(choice.hoverHint));
+                    btn.addEventListener('mouseleave', () => this.hideHoverHint());
+                }
                 this.choicesEl.appendChild(btn);
             });
         }
+    }
+
+    showHoverHint(hint) {
+        try {
+            if (this._hoverBackup === undefined) this._hoverBackup = this.textEl.textContent;
+            this.textEl.textContent = hint;
+            this.textEl.classList.add('hover-hint');
+        } catch (e) {}
+    }
+
+    hideHoverHint() {
+        try {
+            if (this._hoverBackup !== undefined) {
+                this.textEl.textContent = this._hoverBackup;
+                delete this._hoverBackup;
+            }
+            this.textEl.classList.remove('hover-hint');
+        } catch (e) {}
+    }
+
+    renderSystemMessage(node) {
+        // Clear regular dialogue elements
+        this.textEl.textContent = '';
+        this.nameEl.textContent = '';
+        this.leftPortraitEl.innerHTML = '';
+        this.rightPortraitEl.innerHTML = '';
+        this.choicesEl.innerHTML = '';
+
+        // Create system overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'system-overlay';
+        
+        const systemText = document.createElement('div');
+        systemText.className = 'system-text';
+        systemText.textContent = node.text || '';
+        
+        overlay.appendChild(systemText);
+        this.view.appendChild(overlay);
+
+        // Auto-advance system messages after delay
+        setTimeout(() => {
+            overlay.remove();
+            if (this.nodeIndex < this.currentNodes.length - 1) {
+                this.nodeIndex++;
+                this.renderNode();
+            } else {
+                this.renderChoicesOrEnd();
+            }
+        }, 2500);
     }
 
     renderChoicesOrEnd() {
@@ -280,5 +361,50 @@ export class Dialogue {
             this.sfxEl.currentTime = 0;
             await this.sfxEl.play();
         } catch (e) {}
+    }
+
+    updateSceneCharacters(scene) {
+        // Remove existing scene characters
+        const existingCharacters = this.view.querySelectorAll('.scene-character');
+        existingCharacters.forEach(char => char.remove());
+
+        // Add characters if dialogue involves them (for now, show Synthya and Kael in bar scenes)
+        if (scene.background === 'broken_mug') {
+            this.addSceneCharacter('synthya', 'player');
+            this.addSceneCharacter('kael', 'other');
+        }
+    }
+
+    addSceneCharacter(characterId, position) {
+        const char = this.story.characters[characterId];
+        if (!char) return;
+
+        const charEl = document.createElement('div');
+        charEl.className = `scene-character ${position}`;
+        
+        const img = document.createElement('img');
+        img.src = char.images.normal || Object.values(char.images)[0];
+        img.alt = char.name;
+        img.style.height = '300px';
+        img.style.width = 'auto';
+        img.style.objectFit = 'contain';
+        
+        charEl.appendChild(img);
+        this.view.appendChild(charEl);
+    }
+
+    highlightSpeakingCharacter(speaker) {
+        // Remove speaking highlight from all characters
+        const allChars = this.view.querySelectorAll('.scene-character');
+        allChars.forEach(char => char.classList.remove('speaking'));
+
+        // Highlight current speaker
+        if (speaker && speaker.toLowerCase() === 'synthya') {
+            const synthyaChar = this.view.querySelector('.scene-character.player');
+            if (synthyaChar) synthyaChar.classList.add('speaking');
+        } else if (speaker && speaker.toLowerCase() === 'kael') {
+            const kaelChar = this.view.querySelector('.scene-character.other');
+            if (kaelChar) kaelChar.classList.add('speaking');
+        }
     }
 }

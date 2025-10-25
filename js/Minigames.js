@@ -11,7 +11,11 @@ export class Minigames {
         overlay.appendChild(content);
         document.body.appendChild(overlay);
 
-        const cleanup = () => overlay.remove();
+        const cleanup = () => {
+            // Add a brief success effect before cleanup
+            overlay.classList.add('minigame-success');
+            setTimeout(() => overlay.remove(), 300);
+        };
 
         // Build UI by type
         if (def.type === 'hacking_puzzle') {
@@ -36,11 +40,25 @@ export class Minigames {
         }
     }
 
-    // --- Hacking (Simon) ---
+    // --- Audio helpers ---
+    static addHoverSounds(container) {
+        // Add subtle hover sounds to all interactive elements
+        const buttons = container.querySelectorAll('button, .simon-pad, .pipe-cell, .wave-segment');
+        buttons.forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                try { 
+                    const hover = new Audio('assets/audio/select.mp3'); 
+                    hover.volume = 0.2; 
+                    hover.play(); 
+                } catch {} 
+            });
+        });
+    }
+
     static buildSimon(container, def, done) {
         const sfx = (p, vol=0.9) => { try { const a=new Audio(p); a.volume=vol; a.play(); } catch {} };
         const difficulty = (def.difficulty || 'medium').toLowerCase();
-        const seqLen = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 6 : 4;
+        const seqLen = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 7 : 5; // Increased challenge
         const pads = [
             { id: 0, label: 'Q', color: '#00e5ff' },
             { id: 1, label: 'W', color: '#e811ff' },
@@ -53,11 +71,8 @@ export class Minigames {
         let attempts = 0;
 
         container.innerHTML = `
-            <h2 style="margin-top:0;">${def.title || 'Security Bypass Protocol'}</h2>
-            <div class="instructions">
-                <strong>OBJECTIVE:</strong> ${def.description || 'Memorize and repeat the sequence to bypass the security lock.'}
-                <br><strong>DIFFICULTY:</strong> ${difficulty.toUpperCase()} (${seqLen} inputs)
-            </div>
+            <h2 style="margin-top:0;">${def.title || 'Cleanse the Audio'}</h2>
+            ${def.description ? `<p>${def.description}</p>` : '<p>Repeat the sequence.</p>'}
             <div class="minigame-container">
                 <div class="simon-grid">
                     ${pads.map((p,i)=>`<button class="simon-pad" data-id="${i}" style="--pad-color:${p.color}" title="Key: ${p.label}">${p.label}</button>`).join('')}
@@ -129,21 +144,25 @@ export class Minigames {
         };
 
         btnPlay.addEventListener('click', () => { if (!playing) playSequence(); });
-        
-        // Keyboard support
-        document.addEventListener('keydown', function keyHandler(e) {
-            if (playing) return;
-            const keyMap = { 'q': 0, 'Q': 0, 'w': 1, 'W': 1, 'a': 2, 'A': 2, 's': 3, 'S': 3 };
-            if (e.key in keyMap) {
-                e.preventDefault();
-                checkInput(keyMap[e.key]);
-            }
-        });
-        
+        // Autoplay once
+        setTimeout(playSequence, 300);
+
         padEls.forEach((el) => {
             el.addEventListener('click', () => {
                 const id = parseInt(el.dataset.id, 10);
-                checkInput(id);
+                highlight(el);
+                if (id !== sequence[index]) {
+                    statusEl.textContent = 'Wrong! Replaying...';
+                    sfx('assets/audio/wrong.mp3');
+                    setTimeout(playSequence, 800);
+                    return;
+                }
+                index++;
+                if (index >= sequence.length) {
+                    statusEl.textContent = 'Cleansed!';
+                    sfx('assets/audio/select.mp3');
+                    setTimeout(done, 500);
+                }
             });
         });
         
@@ -175,11 +194,8 @@ export class Minigames {
         let moves = 0;
 
         container.innerHTML = `
-            <h2 style="margin-top:0;">${def.title || 'Neural Pathway Repair'}</h2>
-            <div class="instructions">
-                <strong>OBJECTIVE:</strong> ${def.description || 'Rotate the neural pathway pieces to connect power from left to right.'}
-                <br><strong>HINT:</strong> Click any cell to rotate it. The path must flow continuously.
-            </div>
+            <h2 style="margin-top:0;">${def.title || 'Restore the Circuit'}</h2>
+            ${def.description ? `<p>${def.description}</p>` : '<p>Rotate pieces to connect power from left to right.</p>'}
             <div class="minigame-container">
                 <div class="pipe-grid" style="--size:${SIZE}"></div>
                 <div class="pipe-controls">
@@ -259,7 +275,7 @@ export class Minigames {
                 statusEl.textContent = `✓ Pathway Restored! (${moves} moves)`;
                 statusEl.style.color = '#00ff00';
                 sfx('assets/audio/select.mp3');
-                setTimeout(done, 800);
+                setTimeout(done, 500);
             }
         };
 
@@ -280,6 +296,8 @@ export class Minigames {
         });
 
         render();
+        // Add hover sounds to interactive elements
+        this.addHoverSounds(container);
     }
 
     // --- Audio Stitch (wave reorder) ---
@@ -293,11 +311,8 @@ export class Minigames {
         let swaps = 0;
         
         container.innerHTML = `
-            <h2 style="margin-top:0;">${def.title || 'Audio Wave Reconstruction'}</h2>
-            <div class="instructions">
-                <strong>OBJECTIVE:</strong> ${def.description || 'Reorder the audio wave segments to form a continuous, smooth signal.'}
-                <br><strong>HINT:</strong> Click two segments to swap their positions. The waves should flow smoothly from left to right.
-            </div>
+            <h2 style="margin-top:0;">${def.title || 'Stitch the Audio'}</h2>
+            ${def.description ? `<p>${def.description}</p>` : '<p>Reorder the wave segments into a smooth line.</p>'}
             <div class="minigame-container">
                 <div class="wave-grid"></div>
                 <div class="wave-controls">
@@ -320,37 +335,21 @@ export class Minigames {
                 seg.dataset.pos = String(pos);
                 seg.textContent = String.fromCharCode(65 + idx); // Show letters A-E
                 seg.style.setProperty('--phase', String(idx));
-                if(first !== null && first === pos) seg.classList.add('selected');
-                seg.addEventListener('click',()=>{
-                    sfx('assets/audio/select.mp3', 0.5);
-                    if(first === null){
-                        first = pos;
-                        status.textContent = `Selected segment ${pos+1}. Pick another to swap.`;
-                    } else {
-                        if(first !== pos){
-                            [order[first], order[pos]] = [order[pos], order[first]];
-                            swaps++;
-                            swapCounter.textContent = String(swaps);
-                        }
-                        first = null;
-                        status.textContent = 'Checking...';
-                        render();
-                        const correct = order.every((v,i)=>v===i);
-                        if(correct){
-                            status.textContent = `✓ Audio Wave Restored! (${swaps} swaps)`;
-                            status.style.color = '#00ff00';
-                            sfx('assets/audio/select.mp3');
-                            setTimeout(done, 800);
-                        } else {
-                            status.textContent = 'Not quite right. Keep trying!';
-                            status.style.color = '#00ffff';
-                        }
-                    }
+                seg.addEventListener('click', ()=>{
+                    if (first===null) { first = pos; seg.classList.add('selected'); return; }
+                    if (first===pos) { seg.classList.remove('selected'); first=null; return; }
+                    const other = grid.querySelector(`.wave-segment[data-pos="${first}"]`);
+                    if (other) other.classList.remove('selected');
+                    [order[first], order[pos]] = [order[pos], order[first]];
+                    first=null; render();
+                    if (order.every((v,i)=>v===i)) { status.textContent='Audio Restored!'; sfx('assets/audio/select.mp3'); setTimeout(done, 500); }
                 });
                 grid.appendChild(seg);
             });
         };
         render();
+        // Add hover sounds to interactive elements  
+        this.addHoverSounds(container);
     }
 
     // --- Stealth Escape (simple timing) ---
@@ -364,10 +363,7 @@ export class Minigames {
         
         container.innerHTML = `
             <h2 style="margin-top:0;">${def.title || 'Evade the Seeker'}</h2>
-            <div class="instructions">
-                <strong>OBJECTIVE:</strong> ${def.description || 'Navigate from cover to the Sanctum Terminal without being scanned by the Seeker.'}
-                <br><strong>HINT:</strong> Move only when the red scan beam is pointing away from you. Time your movements!
-            </div>
+            ${def.description ? `<p>${def.description}</p>` : '<p>Move only when the scanner is away.</p>'}
             <div class="minigame-container stealth-area">
                 <div class="seeker" title="Seeker scanning pattern"></div>
                 <div class="cover" style="background: linear-gradient(90deg, rgba(0,255,255,0.2) 0%, rgba(0,255,255,0.4) 50%, rgba(0,255,255,0.2) 100%);">
@@ -411,21 +407,14 @@ export class Minigames {
                 status.textContent = `✓ Moved safely! Progress: ${steps}/${stepsRequired}`;
                 status.style.color = '#00ff88';
                 sfx('assets/audio/select.mp3', 0.7);
-                if (steps>=stepsRequired) { 
-                    cancelAnimationFrame(timer); 
-                    status.textContent = `✓ Reached Sanctum Terminal! (${failures} detection${failures !== 1 ? 's' : ''})`;
-                    status.style.color = '#00ff00';
-                    moveBtn.disabled = true;
-                    setTimeout(()=>{ sfx('assets/audio/select.mp3'); done(); }, 800); 
-                }
+                if (steps>=stepsRequired) { cancelAnimationFrame(timer); setTimeout(()=>{ sfx('assets/audio/select.mp3'); done(); }, 300); }
             } else {
-                failures++;
-                status.textContent = `✗ Detected by Seeker! Wait for scan to pass... (Detections: ${failures})`;
-                status.style.color = '#ff6b6b';
-                sfx('assets/audio/alert.mp3', 0.6);
-                moveBtn.style.animation = 'shakeAnim 0.4s ease';
-                setTimeout(() => moveBtn.style.animation = '', 400);
+                status.textContent = 'Detected! Wait for the scan to pass.';
+                sfx('assets/audio/alert.mp3', 0.9);
             }
         });
+        
+        // Add hover sounds to interactive elements
+        this.addHoverSounds(container);
     }
 }
