@@ -226,19 +226,21 @@ class Game {
         Object.assign(this.world, { barX, barY, barW, barH });
 
         // Player placement and size
+        // Synthya sprite spec: width 362px, height 535px (aspect ratio ~0.677)
         if (this.player.img) {
-            const pH = Math.max(160, this.canvas.height * 0.28);
-            const pScale = pH / this.player.img.height;
-            const pW = this.player.img.width * pScale;
-            this.player.w = pW; this.player.h = pH;
+            const targetHeight = Math.max(200, this.canvas.height * 0.32);
+            const synthyaAspect = 362 / 535; // Use spec dimensions for proper aspect
+            const targetWidth = targetHeight * synthyaAspect;
+            this.player.w = targetWidth;
+            this.player.h = targetHeight;
             if (this.player.y === 0) {
                 this.player.x = barX + barW * 0.2;
-                this.player.y = barY + barH - pH;
+                this.player.y = barY + barH - targetHeight;
                 this.player.targetX = this.player.x;
                 this.player.targetY = this.player.y;
             } else {
                 // Keep baseline
-                this.player.y = barY + barH - pH;
+                this.player.y = barY + barH - targetHeight;
             }
         }
 
