@@ -11,7 +11,11 @@ export class Minigames {
         overlay.appendChild(content);
         document.body.appendChild(overlay);
 
-        const cleanup = () => overlay.remove();
+        const cleanup = () => {
+            // Add a brief success effect before cleanup
+            overlay.classList.add('minigame-success');
+            setTimeout(() => overlay.remove(), 300);
+        };
 
         // Build UI by type
         if (def.type === 'hacking_puzzle') {
@@ -36,11 +40,25 @@ export class Minigames {
         }
     }
 
-    // --- Hacking (Simon) ---
+    // --- Audio helpers ---
+    static addHoverSounds(container) {
+        // Add subtle hover sounds to all interactive elements
+        const buttons = container.querySelectorAll('button, .simon-pad, .pipe-cell, .wave-segment');
+        buttons.forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                try { 
+                    const hover = new Audio('assets/audio/select.mp3'); 
+                    hover.volume = 0.2; 
+                    hover.play(); 
+                } catch {} 
+            });
+        });
+    }
+
     static buildSimon(container, def, done) {
         const sfx = (p, vol=0.9) => { try { const a=new Audio(p); a.volume=vol; a.play(); } catch {} };
         const difficulty = (def.difficulty || 'medium').toLowerCase();
-        const seqLen = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 6 : 4;
+        const seqLen = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 7 : 5; // Increased challenge
         const pads = [
             { id: 0, label: 'Q', color: '#00e5ff' },
             { id: 1, label: 'W', color: '#e811ff' },
@@ -52,8 +70,11 @@ export class Minigames {
         let playing = true;
 
         container.innerHTML = `
-            <h2 style="margin-top:0;">${def.title || 'Cleanse the Audio'}</h2>
-            ${def.description ? `<p>${def.description}</p>` : '<p>Repeat the sequence.</p>'}
+            <h2 style="margin-top:0;">${def.title || 'Audio Cleansing Protocol'}</h2>
+            ${def.description ? `<p>${def.description}</p>` : '<p>Listen to the corrupted audio sequence, then repeat it exactly to cleanse the data stream.</p>'}
+            <div class="minigame-instructions">
+                <p><strong>Instructions:</strong> Watch the pads light up in sequence, then click them in the same order. Each mistake resets the sequence.</p>
+            </div>
             <div class="minigame-container">
                 <div class="simon-grid">
                     ${pads.map((p,i)=>`<button class="simon-pad" data-id="${i}" style="--pad-color:${p.color}">${p.label}</button>`).join('')}
@@ -93,6 +114,9 @@ export class Minigames {
         btnPlay.addEventListener('click', () => { if (!playing) playSequence(); });
         // Autoplay once
         setTimeout(playSequence, 300);
+        
+        // Add hover sounds to interactive elements
+        this.addHoverSounds(container);
 
         padEls.forEach((el) => {
             el.addEventListener('click', () => {
@@ -102,6 +126,10 @@ export class Minigames {
                 if (id !== sequence[index]) {
                     statusEl.textContent = 'Wrong! Replaying...';
                     sfx('assets/audio/wrong.mp3');
+                    // Add glitch effect on failure
+                    import('./Particles.js').then(module => {
+                        module.ParticleAnimation.createGlitchEffect(container);
+                    }).catch(() => {});
                     setTimeout(playSequence, 800);
                     return;
                 }
@@ -109,6 +137,10 @@ export class Minigames {
                 if (index >= sequence.length) {
                     statusEl.textContent = 'Cleansed!';
                     sfx('assets/audio/select.mp3');
+                    // Add success burst effect
+                    import('./Particles.js').then(module => {
+                        module.ParticleAnimation.createSuccessBurst(container);
+                    }).catch(() => {});
                     setTimeout(done, 500);
                 }
             });
@@ -138,8 +170,11 @@ export class Minigames {
         board.forEach(row => row.forEach(t => { t.rot = Math.floor(Math.random()*4)% (TYPES[t.type].length); }));
 
         container.innerHTML = `
-            <h2 style="margin-top:0;">${def.title || 'Restore the Circuit'}</h2>
-            ${def.description ? `<p>${def.description}</p>` : '<p>Rotate pieces to connect power from left to right.</p>'}
+            <h2 style="margin-top:0;">${def.title || 'Neural Pathway Restoration'}</h2>
+            ${def.description ? `<p>${def.description}</p>` : '<p>Synthya must repair the corrupted neural pathways in the memory construct.</p>'}
+            <div class="minigame-instructions">
+                <p><strong>Instructions:</strong> Click circuit pieces to rotate them. Create a continuous path from the left power source to the right terminal. Each piece can be rotated to different orientations.</p>
+            </div>
             <div class="minigame-container">
                 <div class="pipe-grid" style="--size:${SIZE}"></div>
                 <div class="pipe-controls">
@@ -214,6 +249,10 @@ export class Minigames {
             if (solved()) {
                 statusEl.textContent = 'Circuit Restored!';
                 sfx('assets/audio/select.mp3');
+                // Add success burst effect
+                import('./Particles.js').then(module => {
+                    module.ParticleAnimation.createSuccessBurst(container);
+                }).catch(() => {});
                 setTimeout(done, 500);
             }
         };
@@ -233,6 +272,8 @@ export class Minigames {
         });
 
         render();
+        // Add hover sounds to interactive elements
+        this.addHoverSounds(container);
     }
 
     // --- Audio Stitch (wave reorder) ---
@@ -244,8 +285,11 @@ export class Minigames {
         for (let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; }
         let first = null;
         container.innerHTML = `
-            <h2 style="margin-top:0;">${def.title || 'Stitch the Audio'}</h2>
-            ${def.description ? `<p>${def.description}</p>` : '<p>Reorder the wave segments into a smooth line.</p>'}
+            <h2 style="margin-top:0;">${def.title || 'Memory Thread Reconstruction'}</h2>
+            ${def.description ? `<p>${def.description}</p>` : '<p>The jukebox memory is fragmented. Synthya must weave the audio threads back together.</p>'}
+            <div class="minigame-instructions">
+                <p><strong>Instructions:</strong> Click two wave segments to swap their positions. Arrange them in the correct order to restore the smooth audio flow. First segment selected will be highlighted.</p>
+            </div>
             <div class="minigame-container">
                 <div class="wave-grid"></div>
                 <div class="wave-controls"><span id="wave-status"></span></div>
@@ -268,12 +312,22 @@ export class Minigames {
                     if (other) other.classList.remove('selected');
                     [order[first], order[pos]] = [order[pos], order[first]];
                     first=null; render();
-                    if (order.every((v,i)=>v===i)) { status.textContent='Audio Restored!'; sfx('assets/audio/select.mp3'); setTimeout(done, 500); }
+                    if (order.every((v,i)=>v===i)) { 
+                        status.textContent='Audio Restored!'; 
+                        sfx('assets/audio/select.mp3'); 
+                        // Add success burst effect
+                        import('./Particles.js').then(module => {
+                            module.ParticleAnimation.createSuccessBurst(container);
+                        }).catch(() => {});
+                        setTimeout(done, 500); 
+                    }
                 });
                 grid.appendChild(seg);
             });
         };
         render();
+        // Add hover sounds to interactive elements  
+        this.addHoverSounds(container);
     }
 
     // --- Stealth Escape (simple timing) ---
@@ -284,8 +338,11 @@ export class Minigames {
         let safe = false;
         let timer=null;
         container.innerHTML = `
-            <h2 style="margin-top:0;">${def.title || 'Evade the Seeker'}</h2>
-            ${def.description ? `<p>${def.description}</p>` : '<p>Move only when the scanner is away.</p>'}
+            <h2 style="margin-top:0;">${def.title || 'Seeker Evasion Protocol'}</h2>
+            ${def.description ? `<p>${def.description}</p>` : '<p>A Seeker program has infiltrated Synthya\'s Archive. She must reach her Sanctum terminal without being detected.</p>'}
+            <div class="minigame-instructions">
+                <p><strong>Instructions:</strong> Watch the red scanner sweep across the area. Click "Move" only when the scanner is pointing away from you. You need ${stepsRequired} successful moves to reach safety.</p>
+            </div>
             <div class="minigame-container stealth-area">
                 <div class="seeker"></div>
                 <div class="cover"></div>
@@ -310,11 +367,25 @@ export class Minigames {
                 steps++;
                 status.textContent = `Moved (${steps}/${stepsRequired})`;
                 sfx('assets/audio/select.mp3', 0.7);
-                if (steps>=stepsRequired) { cancelAnimationFrame(timer); setTimeout(()=>{ sfx('assets/audio/select.mp3'); done(); }, 300); }
+                if (steps>=stepsRequired) { 
+                    cancelAnimationFrame(timer); 
+                    // Add success burst effect
+                    import('./Particles.js').then(module => {
+                        module.ParticleAnimation.createSuccessBurst(container);
+                    }).catch(() => {});
+                    setTimeout(()=>{ sfx('assets/audio/select.mp3'); done(); }, 300); 
+                }
             } else {
                 status.textContent = 'Detected! Wait for the scan to pass.';
                 sfx('assets/audio/alert.mp3', 0.9);
+                // Add glitch effect on detection
+                import('./Particles.js').then(module => {
+                    module.ParticleAnimation.createGlitchEffect(container);
+                }).catch(() => {});
             }
         });
+        
+        // Add hover sounds to interactive elements
+        this.addHoverSounds(container);
     }
 }

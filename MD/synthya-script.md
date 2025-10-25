@@ -8,6 +8,7 @@
 
 * **Refinement (The "Lure"):** To augment the allure of the trap, the "glitched" orb could extend beyond mere pulsation. Upon the player's (as Synthya) mouse-over of the "**Interface with the memory**" button, the "whispering sound effects" could momentarily subside, replaced by a subtle, distorted audio fragment from *within* the memory: the cadence of rain against a window or a singular, distinct note of "soft jazz." This alteration aims to convey the impression of an active memory beckoning, rather than a corrupted file.  
 * **Refinement (Synthya's Character):** Prior to the choice event, a solitary line of internal monologue for Synthya could be introduced. As she observes the corrupted orb, she could contemplate: "This corruption... it feels... *deliberate*. Most memory-frags are chaotic. This one is... contained." This enriches her "Memory Weaver" expertise and preemptively establishes the impending threat.
+* **Add (Subtle UI & Audio Cue):** When the player hovers over "Interface with the memory", include a very brief UI hint line in Synthya's head—"It sounds like rain... or a promise"—and play a short, low-volume audio tease (soft jazz + rain) to lure the player. This communicates intentionally that the orb is bait and ties directly into the memory's song motif.
 
 **2\. Scene 2: The Loop**
 
