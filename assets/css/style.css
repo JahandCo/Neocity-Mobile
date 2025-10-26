@@ -142,9 +142,6 @@ html, body {
 #dialogue-view {
     position: absolute;
     inset: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
     background: transparent;
     z-index: 100;
     pointer-events: none;
@@ -153,44 +150,78 @@ html, body {
 /* Ensure hidden reliably hides the dialogue overlay despite ID rule specificity */
 #dialogue-view.hidden { display: none !important; }
 
-#dialogue-view .dialogue-box {
-    width: min(95%, 1100px);
-    min-height: 320px;
-    background: rgba(10, 10, 30, 0.9);
-    border: 2px solid rgba(0,255,255,0.3);
-    box-shadow: 0 0 40px rgba(0, 255, 255, 0.2);
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: 24px;
-    padding: 24px;
+/* Character portraits - displayed large behind dialogue box */
+#dialogue-view .character-portrait {
+    position: absolute;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 99; /* Behind dialogue box */
+}
+
+#dialogue-view .character-portrait.left {
+    left: 10%;
+}
+
+#dialogue-view .character-portrait.right {
+    right: 10%;
+}
+
+/* Single character centered */
+#dialogue-view.single-character .character-portrait.left {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#dialogue-view.single-character .character-portrait.right {
+    display: none; /* Hide right portrait in single character mode */
 }
 
 #dialogue-view .character-portrait img {
-    width: 100%;
-    height: auto;
+    height: 500px;
+    width: auto;
     object-fit: contain;
-    filter: drop-shadow(0 4px 14px rgba(0,0,0,0.6));
+    object-position: bottom;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.9));
+}
+
+/* Dialogue box at bottom of screen - in front of characters */
+#dialogue-view .dialogue-box {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(90%, 1000px);
+    min-height: 180px;
+    max-height: 250px;
+    background: rgba(5, 5, 20, 0.95);
+    border: 2px solid rgba(0,255,255,0.4);
+    box-shadow: 0 0 60px rgba(0, 255, 255, 0.3);
+    padding: 24px 32px;
+    border-radius: 8px;
+    pointer-events: auto; /* Re-enable pointer events for the dialogue box */
+    z-index: 102; /* In front of characters */
 }
 
 #dialogue-view .dialogue-content {
     display: flex;
     flex-direction: column;
-    flex: 1;
-    padding: 20px 24px;
-    order: 1;
+    gap: 12px;
 }
 
 #dialogue-view .character-name {
-    font-size: 24px;
+    font-size: 20px;
+    font-weight: 700;
     color: #00ffff;
-    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
 }
 
 #dialogue-view .dialogue-text {
-    font-size: 20px;
-    line-height: 1.7;
-    color: #e6faff;
-    min-height: 140px;
+    font-size: 18px;
+    line-height: 1.6;
+    color: #ffffff;
+    flex: 1;
 }
 
 #dialogue-view .dialogue-choices {
@@ -215,6 +246,38 @@ html, body {
     background: #00ffff;
     color: #000;
     box-shadow: 0 0 12px #00ffff;
+}
+
+/* System message box - top of screen */
+.system-overlay {
+    position: fixed;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(85%, 900px);
+    background: rgba(0, 10, 20, 0.95);
+    border: 2px solid rgba(0, 255, 255, 0.5);
+    box-shadow: 0 0 40px rgba(0, 255, 255, 0.4);
+    padding: 24px 40px;
+    border-radius: 8px;
+    z-index: 200;
+    pointer-events: none; /* Not directly clickable - advances through dialogue view clicks */
+}
+
+.system-text {
+    font-size: 22px;
+    font-weight: 600;
+    color: #00ffff;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-align: center;
+    text-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+    animation: system-pulse 2s infinite;
+}
+
+@keyframes system-pulse {
+    0%, 100% { opacity: 1; text-shadow: 0 0 15px rgba(0, 255, 255, 0.8); }
+    50% { opacity: 0.85; text-shadow: 0 0 25px rgba(0, 255, 255, 1); }
 }
 
 /* Dialogue effects - Enhanced for Phase 1 */

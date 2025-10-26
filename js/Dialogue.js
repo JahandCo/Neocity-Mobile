@@ -27,12 +27,29 @@ export class Dialogue {
 
         // Click handling
         this.view.addEventListener('click', (e) => this.onClick(e));
+        
+        // Keyboard handling for dialogue advancement
+        this.keyHandler = (e) => this.onKeyPress(e);
+        this.keyHandlerActive = false; // Will be activated when dialogue starts
     }
 
     // Public API
     startStory(sceneId) {
+        // Ensure keyboard handler is active
+        if (!this.keyHandlerActive) {
+            document.addEventListener('keydown', this.keyHandler);
+            this.keyHandlerActive = true;
+        }
         this.loadScene(sceneId);
         this.game.changeState('dialogue');
+    }
+
+    cleanup() {
+        // Remove keyboard handler when leaving dialogue
+        if (this.keyHandlerActive) {
+            document.removeEventListener('keydown', this.keyHandler);
+            this.keyHandlerActive = false;
+        }
     }
 
     loadScene(sceneId) {
@@ -122,30 +139,72 @@ export class Dialogue {
         this.leftPortraitEl.innerHTML = '';
         this.rightPortraitEl.innerHTML = '';
 
-        // Determine portrait position based on speaker
-        const imgSrc = this.getPortrait(node.speaker, node.emotion);
-        if (imgSrc) {
-            const img = document.createElement('img');
-            img.src = imgSrc;
-            img.alt = node.speaker || 'Speaker';
-            
-            // Player character (Synthya) goes on left, others on right
-            if (node.speaker && node.speaker.toLowerCase() === 'synthya') {
-                this.leftPortraitEl.appendChild(img);
-            } else {
-                this.rightPortraitEl.appendChild(img);
-            }
+        // Determine which characters are currently in the scene
+        const currentSpeaker = node.speaker ? node.speaker.toLowerCase() : null;
+        const scene = this.story.scenes[this.currentSceneId];
+        
+        // Check if there are multiple characters in this scene (look at all dialogue nodes)
+        const allSpeakers = new Set();
+        if (scene && scene.dialogue) {
+            scene.dialogue.forEach(n => {
+                if (n.speaker && n.speaker !== 'System') {
+                    allSpeakers.add(n.speaker.toLowerCase());
+                }
+            });
         }
-
-        // Highlight speaking character in scene
-        this.highlightSpeakingCharacter(node.speaker);
+        
+        // Show character(s) based on scene composition
+        if (allSpeakers.size === 1) {
+            // Single character scene - show centered
+            this.view.classList.add('single-character');
+            const imgSrc = this.getPortrait(node.speaker, node.emotion);
+            if (imgSrc) {
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.alt = node.speaker || 'Speaker';
+                // Put in left portrait container for centering
+                this.leftPortraitEl.appendChild(img);
+            }
+        } else if (allSpeakers.size >= 2) {
+            // Two character scene - show both (left = Synthya, right = other)
+            this.view.classList.remove('single-character');
+            const speakers = Array.from(allSpeakers);
+            
+            // Synthya always on left
+            const synthyaSpeaker = speakers.find(s => s === 'synthya');
+            const otherSpeaker = speakers.find(s => s !== 'synthya');
+            
+            if (synthyaSpeaker) {
+                const synthyaEmotion = currentSpeaker === 'synthya' ? node.emotion : 'speak';
+                const synthyaImg = this.getPortrait('synthya', synthyaEmotion);
+                if (synthyaImg) {
+                    const img = document.createElement('img');
+                    img.src = synthyaImg;
+                    img.alt = 'Synthya';
+                    this.leftPortraitEl.appendChild(img);
+                }
+            }
+            
+            if (otherSpeaker) {
+                const otherEmotion = currentSpeaker === otherSpeaker ? node.emotion : 'speak';
+                const otherImg = this.getPortrait(otherSpeaker, otherEmotion);
+                if (otherImg) {
+                    const img = document.createElement('img');
+                    img.src = otherImg;
+                    img.alt = otherSpeaker;
+                    this.rightPortraitEl.appendChild(img);
+                }
+            }
+        } else {
+            // No characters to show
+            this.view.classList.remove('single-character');
+        }
 
         // Effects
         this.applyEffects(node.effects || []);
 
         // Choices
         this.choicesEl.innerHTML = '';
-        const scene = this.story.scenes[this.currentSceneId];
         if (scene && scene.choices && this.nodeIndex === this.currentNodes.length - 1) {
             // Only display scene choices on last node
             scene.choices.forEach(choice => {
@@ -154,6 +213,8 @@ export class Dialogue {
                 btn.className = 'choice-btn';
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    e.preventDefault();
+                    console.log('Choice clicked:', choice.text);
                     if (choice.nextScene) {
                         this.loadScene(choice.nextScene);
                     } else {
@@ -193,14 +254,18 @@ export class Dialogue {
     }
 
     renderSystemMessage(node) {
-        // Clear regular dialogue elements
+        // Clear regular dialogue elements and portraits
         this.textEl.textContent = '';
         this.nameEl.textContent = '';
         this.leftPortraitEl.innerHTML = '';
         this.rightPortraitEl.innerHTML = '';
         this.choicesEl.innerHTML = '';
 
-        // Create system overlay
+        // Remove any existing system overlay
+        const existingOverlay = this.view.querySelector('.system-overlay');
+        if (existingOverlay) existingOverlay.remove();
+
+        // Create system message box (non-clickable, top of screen)
         const overlay = document.createElement('div');
         overlay.className = 'system-overlay';
         
@@ -210,17 +275,9 @@ export class Dialogue {
         
         overlay.appendChild(systemText);
         this.view.appendChild(overlay);
-
-        // Auto-advance system messages after delay
-        setTimeout(() => {
-            overlay.remove();
-            if (this.nodeIndex < this.currentNodes.length - 1) {
-                this.nodeIndex++;
-                this.renderNode();
-            } else {
-                this.renderChoicesOrEnd();
-            }
-        }, 2500);
+        
+        // System message is visible but not clickable
+        // User advances through normal click/space handling in onClick/onKeyPress
     }
 
     renderChoicesOrEnd() {
@@ -233,6 +290,8 @@ export class Dialogue {
                 btn.className = 'choice-btn';
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    e.preventDefault();
+                    console.log('Choice clicked (renderChoicesOrEnd):', choice.text);
                     this.loadScene(choice.nextScene);
                 });
                 this.choicesEl.appendChild(btn);
@@ -243,7 +302,27 @@ export class Dialogue {
     }
 
     onClick(e) {
-        // If clicked on a choice, its handler already ran (stopPropagation)
+        // Choice buttons call stopPropagation, so this won't run for them
+        // But let's be defensive and check anyway
+        if (e.target.tagName === 'BUTTON' || e.target.closest('.choice-btn')) {
+            // This shouldn't happen due to stopPropagation, but just in case
+            return;
+        }
+        
+        // Check if we're showing a system message
+        const systemOverlay = this.view.querySelector('.system-overlay');
+        if (systemOverlay) {
+            // Remove system message and advance
+            systemOverlay.remove();
+            if (this.nodeIndex < this.currentNodes.length - 1) {
+                this.nodeIndex++;
+                this.renderNode();
+            } else {
+                this.renderChoicesOrEnd();
+            }
+            return;
+        }
+        
         // Advance node otherwise
         const scene = this.story.scenes[this.currentSceneId];
         if (!scene) return;
@@ -255,14 +334,58 @@ export class Dialogue {
         }
     }
 
+    onKeyPress(e) {
+        // Only handle space/enter when in dialogue state
+        if (this.game.gameState !== 'dialogue') return;
+        
+        // Don't advance if typing in an input field
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            return;
+        }
+        
+        // Space or Enter to advance dialogue
+        if (e.code === 'Space' || e.code === 'Enter') {
+            e.preventDefault();
+            
+            // Check if we're showing a system message
+            const systemOverlay = this.view.querySelector('.system-overlay');
+            if (systemOverlay) {
+                // Remove system message and advance
+                systemOverlay.remove();
+                if (this.nodeIndex < this.currentNodes.length - 1) {
+                    this.nodeIndex++;
+                    this.renderNode();
+                } else {
+                    this.renderChoicesOrEnd();
+                }
+                return;
+            }
+            
+            // If there are choices visible, don't auto-advance
+            const scene = this.story.scenes[this.currentSceneId];
+            if (scene && scene.choices && scene.choices.length > 0 && this.nodeIndex >= this.currentNodes.length - 1) {
+                return;
+            }
+            
+            // Advance dialogue
+            if (this.nodeIndex < this.currentNodes.length - 1) {
+                this.nodeIndex++;
+                this.renderNode();
+            } else if (!scene.choices || scene.choices.length === 0) {
+                this.game.endDialogue();
+            }
+        }
+    }
+
     getPortrait(speaker, emotion) {
         if (!speaker) return null;
         const key = speaker.trim().toLowerCase();
         const char = Object.values(this.story.characters).find(c => c.name.toLowerCase() === key) || this.story.characters[key];
         if (!char) return null;
+        
+        // Use specified emotion, fall back to 'speak' (default dialogue pose), then any available image
         if (emotion && char.images[emotion]) return char.images[emotion];
-        // Fallbacks
-        return char.images.normal || Object.values(char.images)[0] || null;
+        return char.images.speak || char.images.normal || Object.values(char.images)[0] || null;
     }
 
     applyEffects(effects) {

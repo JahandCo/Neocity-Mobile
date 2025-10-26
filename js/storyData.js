@@ -28,13 +28,13 @@ export const synthyaStory = {
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "Another quiet cycle in the Archive. These data-fragments... so many memories, waiting to be restored.",
                     effects: null
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "This corruption... it feels... deliberate. Most memory-frags are chaotic. This one is... contained.",
                     effects: ["glitch"]
                 },
@@ -46,7 +46,7 @@ export const synthyaStory = {
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "A new client? This late in the cycle? Let me see...",
                     effects: null
                 },
@@ -58,7 +58,7 @@ export const synthyaStory = {
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "The data packet... it's different. That pulsating glitch pattern... I've never seen corruption like this before.",
                     effects: ["flicker"]
                 }
@@ -82,7 +82,7 @@ export const synthyaStory = {
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "I'm a Memory Weaver. This is what I do. I have to help them.",
                     effects: null
                 }
@@ -101,7 +101,7 @@ export const synthyaStory = {
             dialogue: [
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "Initiating interface protocol...",
                     effects: ["scan"]
                 },
@@ -134,19 +134,19 @@ export const synthyaStory = {
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "The Broken Mug? But I was just in my Archive... The warm lighting, the jazz music... this feels so real.",
                     effects: null
                 },
                 {
                     speaker: "Kael",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "You made it. Was worried you'd get lost in the rain.",
                     effects: null
                 },
                 {
                     speaker: "Kael",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "*He raises his cup* To the next project.",
                     effects: null
                 }
@@ -164,13 +164,13 @@ export const synthyaStory = {
             dialogue: [
                 {
                     speaker: "Kael",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "You're always in your own head, 'Thya.",
                     effects: null
                 },
                 {
                     speaker: "Kael",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "*He takes a sip and chuckles*",
                     effects: null
                 },
@@ -190,13 +190,13 @@ export const synthyaStory = {
             dialogue: [
                 {
                     speaker: "Kael",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "You're always in your own head, 'Thya. Still at The Broken Mug, where else would we be?",
                     effects: null
                 },
                 {
                     speaker: "Kael",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "*He takes a sip and chuckles*",
                     effects: null
                 },
@@ -216,13 +216,13 @@ export const synthyaStory = {
             dialogue: [
                 {
                     speaker: "Kael",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "You're always in your own head, 'Thya. Of course it's me.",
                     effects: null
                 },
                 {
                     speaker: "Kael",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "*He takes a sip and chuckles*",
                     effects: null
                 },
@@ -240,9 +240,9 @@ export const synthyaStory = {
             background: "broken_mug",
             music: "assets/audio/menu2.mp3",
             dialogue: [
-                { speaker: "Synthya", emotion: "normal", text: "No. He already said that. This is a loop.", effects: ["flicker"] },
-                { speaker: "Kael", emotion: "normal", text: "You made it. Was worried you'd get lost in the rain.", effects: null },
-                { speaker: "Kael", emotion: "normal", text: "*His smile looks fixed* To the next project.", effects: ["flicker"] }
+                { speaker: "Synthya", emotion: "speak", text: "No. He already said that. This is a loop.", effects: ["flicker"] },
+                { speaker: "Kael", emotion: "speak", text: "You made it. Was worried you'd get lost in the rain.", effects: null },
+                { speaker: "Kael", emotion: "speak", text: "*His smile looks fixed* To the next project.", effects: ["flicker"] }
             ],
             choices: [ { text: "Continue", nextScene: "loop_dialogue_2" } ]
         },
@@ -269,13 +269,13 @@ export const synthyaStory = {
                 },
                 {
                     speaker: "Kael",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "You made it. Was worried you'd get lost in the rain.",
                     effects: null
                 },
                 {
                     speaker: "Kael",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "*He raises his cup* To the next project.",
                     effects: null
                 },
@@ -307,13 +307,13 @@ export const synthyaStory = {
             dialogue: [
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "I need to look around. There has to be something wrong here... an anomaly I can exploit.",
                     effects: null
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "The jukebox is skipping, the neon sign is glitching... and Kael just keeps repeating himself.",
                     effects: null
                 }
@@ -328,7 +328,7 @@ export const synthyaStory = {
             dialogue: [
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "The jukebox... the jazz track is stuck. Playing the same three notes over and over.",
                     effects: null
                 },
@@ -338,7 +338,7 @@ export const synthyaStory = {
                     text: "CORRUPTED AUDIO STREAM DETECTED. Manual repair required.",
                     effects: ["glitch"]
                 },
-                { speaker: "Synthya", emotion: "normal", text: "I can fix this. Stitch the broken soundwave back together...", effects: null }
+                { speaker: "Synthya", emotion: "speak", text: "I can fix this. Stitch the broken soundwave back together...", effects: null }
             ],
             choices: [
                 { text: "Start the audio stitch", nextScene: "jukebox_minigame", minigame: "audio_stitch" }
@@ -369,7 +369,7 @@ export const synthyaStory = {
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "'Echo and the Grid'... That's one of Echo's bands. This could be a clue about who trapped me here.",
                     effects: null
                 }
@@ -388,7 +388,7 @@ export const synthyaStory = {
             dialogue: [
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "One anomaly fixed. But I'm still trapped. What else can I investigate?",
                     effects: null
                 }
@@ -403,7 +403,7 @@ export const synthyaStory = {
             dialogue: [
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "The neon sign behind the counter... 'The Broken Mug'. The 'O' in 'Broken' is flickering badly.",
                     effects: ["flicker"]
                 },
@@ -415,7 +415,7 @@ export const synthyaStory = {
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "A circuit puzzle. I need to reconnect the power flow to stabilize the sign.",
                     effects: null
                 }
@@ -470,7 +470,7 @@ export const synthyaStory = {
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "Unless... unless this trap was set by someone who knows both Kael and Vesper. Someone close to us.",
                     effects: null
                 }
@@ -489,13 +489,13 @@ export const synthyaStory = {
             dialogue: [
                 {
                     speaker: "Kael",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "You made it. Was worried you'd get lost in the rain.",
                     effects: null
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "Still the same line. I need to fix the anomalies first before I can break through to him.",
                     effects: null
                 }
@@ -515,19 +515,19 @@ export const synthyaStory = {
             dialogue: [
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "I've fixed the jukebox and the sign. The loop is weakening. Time to confront this... memory.",
                     effects: null
                 },
                 {
                     speaker: "Kael",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "You made it. Was worried you'd get lost in the rain.",
                     effects: null
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "...",
                     effects: null
                 }
@@ -550,25 +550,25 @@ export const synthyaStory = {
             dialogue: [
                 {
                     speaker: "Kael",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "What... what do you mean? Of course I'm Kael.",
                     effects: ["flicker"]
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "Prove it. What was our first project?",
                     effects: null
                 },
                 {
                     speaker: "Kael",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "PROJECT... DOES NOT... COMPUTE...",
                     effects: ["glitch"]
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "You don't know, do you? Because you're not really Kael. You're just a copied memory... and an incomplete one.",
                     effects: null
                 }
@@ -582,25 +582,25 @@ export const synthyaStory = {
             dialogue: [
                 {
                     speaker: "Kael",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "What... what do you mean? Of course I am.",
                     effects: ["flicker"]
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "No. You're a fabricated memory. Whoever trapped me here used Kael's image, but they don't know him. Not really.",
                     effects: null
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "Prove it. What was our first project together?",
                     effects: null
                 },
                 {
                     speaker: "Kael",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "PROJECT... DOES NOT... COMPUTE...",
                     effects: ["glitch"]
                 }
@@ -612,7 +612,7 @@ export const synthyaStory = {
         kael_override: {
             background: "broken_mug",
             music: null,
-            dialogue: [ { speaker: "Synthya", emotion: "normal", text: "Prove it. What was our first project?", effects: ["glitch"] } ],
+            dialogue: [ { speaker: "Synthya", emotion: "speak", text: "Prove it. What was our first project?", effects: ["glitch"] } ],
             inputPrompt: "[Override: What was your first project?]",
             inputAnswer: "Project Sundown",
             nextOnCorrect: "memory_break"
@@ -625,7 +625,7 @@ export const synthyaStory = {
             dialogue: [
                 {
                     speaker: "Kael",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "ERROR... ERROR... MEMORY INTEGRITY COMPROMISED...",
                     effects: ["glitch", "flicker"]
                 },
@@ -747,19 +747,19 @@ export const synthyaStory = {
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "Grid Sector: NULL... That's the restricted zone. The place where deleted data goes to die.",
                     effects: null
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "Someone in the NULL sector set this trap for me. But why? What are they hiding?",
                     effects: null
                 },
                 {
                     speaker: "Synthya",
-                    emotion: "normal",
+                    emotion: "speak",
                     text: "Echo was mentioned... Vesper was in the logs... and they used Kael's image. This is connected to people I know.",
                     effects: null
                 },
@@ -796,25 +796,28 @@ export const synthyaStory = {
         synthya: {
             name: "Synthya",
             images: {
-                normal: "assets/images/characters/synthya/synthya-normal.png",
-                happy: "assets/images/characters/synthya/synthya-happy.png",
-                sad: "assets/images/characters/synthya/synthya-sad.png",
-                surprise: "assets/images/characters/synthya/synthya-surprise.png"
+                speak: "assets/images/characters/synthya/poses/synthya-speak.png",
+                happy: "assets/images/characters/synthya/poses/synthya-happy.png",
+                sad: "assets/images/characters/synthya/poses/synthya-sad.png",
+                surprise: "assets/images/characters/synthya/poses/synthya-surprise.png"
             }
         },
         kael: {
             name: "Kael",
             images: {
-                normal: "assets/images/characters/kael/kael-normal.png",
-                happy: "assets/images/characters/kael/kael-happy.png",
-                surprise: "assets/images/characters/kael/kael-surprise.png",
-                think: "assets/images/characters/kael/kael-think.png"
+                speak: "assets/images/characters/kael/poses/kael-speak.png",
+                happy: "assets/images/characters/kael/poses/kael-laugh-glitch.png",
+                sad: "assets/images/characters/kael/poses/kael-sad.png",
+                surprise: "assets/images/characters/kael/poses/kael-surprised.png",
+                think: "assets/images/characters/kael/poses/kael-think.png",
+                wave: "assets/images/characters/kael/poses/kael-wave.png",
+                glitch: "assets/images/characters/kael/poses/kael-glitch.png"
             }
         },
         bartender: {
             name: "Bartender",
             images: {
-                normal: "assets/images/characters/synthya/synthya.png" // Placeholder
+                speak: "assets/images/characters/synthya/poses/synthya-speak.png" // Placeholder
             }
         }
     },

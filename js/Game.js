@@ -506,7 +506,7 @@ class Game {
         sign.onload = () => { this.world.signImg = sign; this.layoutScene(); };
 
         const kael = new Image();
-        kael.src = 'assets/images/characters/kael/kael-normal.png';
+        kael.src = 'assets/images/characters/kael/poses/npc/kael-npc.png';
         kael.onload = () => { this.world.kaelImg = kael; this.layoutScene(); };
 
         const syn = new Image();
@@ -547,6 +547,10 @@ class Game {
 
     // --- Dialogue End Hook ---
     endDialogue() {
+        // Clean up dialogue keyboard handlers
+        if (this.dialogue && this.dialogue.cleanup) {
+            this.dialogue.cleanup();
+        }
         // Return to world exploration
         this.changeState('world');
     }
