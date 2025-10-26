@@ -242,31 +242,35 @@ class Game {
     layoutScene() {
         // Compute bar rect and place entities when images are loaded
         if (!this.world.barImg) return;
+        
+        // Bar should be positioned at the bottom as a foreground element
+        // Constrain bar height to max 40% of canvas to leave room for characters
+        const maxBarH = this.canvas.height * 0.4;
         const aspect = this.world.barImg.height / this.world.barImg.width;
-        const barW = this.canvas.width * 0.8;
-        const barH = barW * aspect;
+        let barW = this.canvas.width * 0.8;
+        let barH = barW * aspect;
+        
+        // If bar is too tall, scale it down
+        if (barH > maxBarH) {
+            barH = maxBarH;
+            barW = barH / aspect;
+        }
+        
         const barX = (this.canvas.width - barW) / 2;
-        // Position bar on the ground (bottom of screen)
+        // Position bar at the very bottom of screen
         const barY = this.canvas.height - barH;
         Object.assign(this.world, { barX, barY, barW, barH });
 
         // Player placement and size
         // Synthya sprite spec: width 362px, height 535px (aspect ratio ~0.677)
         if (this.player.img) {
-            // Target sprite size requested by design
-            const DESIRED_W = 362;
-            const DESIRED_H = 535;
-
-            // Compute a responsive scale so the sprite fits on small viewports
-            const maxH = Math.max(200, this.canvas.height * 0.5); // allow reasonable max height
-            const maxW = Math.max(140, this.canvas.width * 0.3);
-            const scaleH = maxH / DESIRED_H;
-            const scaleW = maxW / DESIRED_W;
-            // Use the smaller scale to ensure we never overflow available UI space
-            const useScale = Math.min(1, scaleH, scaleW);
-
-            const pW = Math.round(DESIRED_W * useScale);
-            const pH = Math.round(DESIRED_H * useScale);
+            // Scale player to fit in available space above bar
+            const availableHeight = barY * 0.9; // Use 90% of space above bar
+            const maxH = Math.min(availableHeight, 400); // Cap at reasonable size
+            const DESIRED_ASPECT = 362 / 535;
+            
+            const pH = maxH;
+            const pW = pH * DESIRED_ASPECT;
 
             this.player.w = pW; this.player.h = pH;
             // Position player standing on the ground in front of the bar
@@ -284,7 +288,9 @@ class Game {
 
         // Kael placement (bartender behind the counter)
         if (this.world.kaelImg) {
-            const kH = Math.max(200, this.canvas.height * 0.4);
+            // Kael should be similar size to player
+            const availableHeight = barY * 0.9;
+            const kH = Math.min(availableHeight, 380);
             const kScale = kH / this.world.kaelImg.height;
             const kW = this.world.kaelImg.width * kScale;
             // Position Kael behind the bar as the bartender, standing on ground
@@ -296,7 +302,8 @@ class Game {
 
         // Jukebox (positioned on the floor to the left)
         if (this.world.jukeboxImg) {
-            const jH = Math.max(160, this.canvas.height * 0.3);
+            const availableHeight = barY * 0.8;
+            const jH = Math.min(availableHeight, 200);
             const jScale = jH / this.world.jukeboxImg.height;
             const jW = this.world.jukeboxImg.width * jScale;
             // Position jukebox on the left side, standing on the ground
@@ -307,12 +314,12 @@ class Game {
 
         // Neon sign (hanging above the bar)
         if (this.world.signImg) {
-            const sW = Math.max(180, this.canvas.width * 0.22);
+            const sW = Math.min(barW * 0.35, 250);
             const sAspect = this.world.signImg.height / this.world.signImg.width;
             const sH = sW * sAspect;
             // Position sign hanging above the bar center
             const sX = barX + (barW - sW) / 2; // Center above bar
-            const sY = barY - sH - 20; // Hang above the bar with some gap
+            const sY = Math.max(barY - sH - 30, 10); // Hang above the bar with gap, min 10px from top
             Object.assign(this.world, { signX: sX, signY: sY, signW: sW, signH: sH });
         }
     }

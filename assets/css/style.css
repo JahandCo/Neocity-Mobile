@@ -150,20 +150,20 @@ html, body {
 /* Ensure hidden reliably hides the dialogue overlay despite ID rule specificity */
 #dialogue-view.hidden { display: none !important; }
 
-/* Character portraits - displayed large behind dialogue box */
+/* Character portraits - displayed at foot level, standing above dialogue box */
 #dialogue-view .character-portrait {
     position: absolute;
-    bottom: 0;
+    bottom: 200px; /* Positioned above dialogue box at foot level */
     pointer-events: none;
-    z-index: 99; /* Behind dialogue box */
+    z-index: 101; /* Above dialogue box so poses are not cut off */
 }
 
 #dialogue-view .character-portrait.left {
-    left: 10%;
+    left: 5%;
 }
 
 #dialogue-view .character-portrait.right {
-    right: 10%;
+    right: 5%;
 }
 
 /* Single character centered */
@@ -177,14 +177,14 @@ html, body {
 }
 
 #dialogue-view .character-portrait img {
-    height: 500px;
+    height: 450px;
     width: auto;
     object-fit: contain;
     object-position: bottom;
     filter: drop-shadow(0 8px 24px rgba(0,0,0,0.9));
 }
 
-/* Dialogue box at bottom of screen - in front of characters */
+/* Dialogue box at bottom of screen - under character poses to prevent blocking content */
 #dialogue-view .dialogue-box {
     position: absolute;
     bottom: 20px;
@@ -199,7 +199,7 @@ html, body {
     padding: 24px 32px;
     border-radius: 8px;
     pointer-events: auto; /* Re-enable pointer events for the dialogue box */
-    z-index: 102; /* In front of characters */
+    z-index: 100; /* Under character poses */
 }
 
 #dialogue-view .dialogue-content {
